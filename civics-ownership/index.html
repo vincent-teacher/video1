@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>公民｜所有權的物權特性</title>
+<style>
+:root{
+  --bg1:#0f172a; --bg2:#1e293b;
+  --accent:#38bdf8; --accent2:#f472b6; --accent3:#facc15;
+  --ink:#f8fafc; --muted:#94a3b8; --card:rgba(255,255,255,.07); --line:rgba(255,255,255,.14);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:100%;height:100%;background:#000;overflow:hidden;font-family:"Noto Sans TC","PingFang TC","Microsoft JhengHei","Heiti TC",system-ui,sans-serif;color:var(--ink)}
+#viewport{position:fixed;inset:0;display:flex;align-items:center;justify-content:center}
+#stage{position:relative;width:1080px;height:1920px;flex:none;transform-origin:center center;overflow:hidden;
+  background:radial-gradient(1200px 900px at 15% 0%,color-mix(in srgb,var(--accent) 22%,transparent),transparent 60%),
+             radial-gradient(1000px 900px at 100% 100%,color-mix(in srgb,var(--accent2) 20%,transparent),transparent 60%),
+             linear-gradient(160deg,var(--bg1),var(--bg2));}
+/* floating background particles */
+.bgdots{position:absolute;inset:0;pointer-events:none;opacity:.35}
+.bgdots span{position:absolute;border-radius:50%;background:var(--accent);filter:blur(1px);animation:drift linear infinite}
+@keyframes drift{from{transform:translateY(0)}to{transform:translateY(-2100px)}}
+
+/* header */
+#header{position:absolute;left:0;right:0;top:0;height:200px;padding:56px 64px 0;display:flex;align-items:center;gap:24px;z-index:5}
+#subjectTag{font-size:34px;font-weight:800;padding:10px 26px;border-radius:999px;background:var(--accent);color:#0b1020;letter-spacing:2px;white-space:nowrap}
+#lessonTitle{font-size:38px;font-weight:700;color:var(--ink);opacity:.92;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#sectionBar{position:absolute;top:200px;left:64px;right:64px;height:64px;display:flex;align-items:center;gap:18px;z-index:5}
+#sectionName{font-size:30px;color:var(--accent);font-weight:700;letter-spacing:2px}
+#pageNo{margin-left:auto;font-size:28px;color:var(--muted);font-variant-numeric:tabular-nums}
+
+/* slides */
+#slides{position:absolute;left:0;right:0;top:270px;height:1250px;perspective:2000px}
+.slide{position:absolute;inset:0;padding:10px 64px;visibility:hidden;opacity:0}
+.slide.show{visibility:visible;opacity:1}
+.slide h2{font-size:68px;line-height:1.25;font-weight:900;margin-bottom:28px;letter-spacing:1px}
+.slide h2 .hl{color:var(--accent)}
+.slide h3{font-size:46px;font-weight:800;margin:14px 0}
+.slide p,.slide li{font-size:40px;line-height:1.6}
+.slide .card{background:var(--card);border:2px solid var(--line);border-radius:32px;padding:32px 36px;margin:18px 0;backdrop-filter:blur(4px)}
+.slide .big{font-size:96px;font-weight:900;color:var(--accent3)}
+.slide .muted{color:var(--muted)}
+.slide .c1{color:var(--accent)} .slide .c2{color:var(--accent2)} .slide .c3{color:var(--accent3)}
+.slide .row{display:flex;gap:24px} .slide .row>*{flex:1}
+.slide .chip{display:inline-block;padding:8px 22px;border-radius:999px;background:color-mix(in srgb,var(--accent) 25%,transparent);border:2px solid var(--accent);font-size:32px;margin:6px 8px 6px 0}
+.slide .formula{font-family:"Cambria Math","Times New Roman",serif;font-size:56px;text-align:center;padding:24px;border-radius:24px;background:rgba(0,0,0,.25);border:2px dashed var(--accent)}
+.slide svg{display:block;max-width:100%;overflow:visible}
+.slide svg text{font-family:inherit}.slide svg text:not([fill]){fill:var(--ink)}
+
+/* transitions (enter) */
+.slide.enter-fade{animation:tFade .9s ease both}
+.slide.enter-slide{animation:tSlide .9s cubic-bezier(.2,.8,.2,1) both}
+.slide.enter-up{animation:tUp .9s cubic-bezier(.2,.8,.2,1) both}
+.slide.enter-zoom{animation:tZoom .9s cubic-bezier(.2,.8,.2,1) both}
+.slide.enter-flip{animation:tFlip 1s cubic-bezier(.2,.8,.2,1) both;transform-origin:center}
+.slide.enter-wipe{animation:tWipe 1s cubic-bezier(.6,0,.2,1) both}
+.slide.enter-circle{animation:tCircle 1.1s cubic-bezier(.6,0,.2,1) both}
+.slide.enter-blur{animation:tBlur 1s ease both}
+.slide.leave{visibility:visible;animation:tLeave .7s ease both}
+@keyframes tFade{from{opacity:0}to{opacity:1}}
+@keyframes tSlide{from{opacity:0;transform:translateX(320px)}to{opacity:1;transform:none}}
+@keyframes tUp{from{opacity:0;transform:translateY(220px)}to{opacity:1;transform:none}}
+@keyframes tZoom{from{opacity:0;transform:scale(.7)}to{opacity:1;transform:none}}
+@keyframes tFlip{from{opacity:0;transform:rotateY(-80deg)}to{opacity:1;transform:none}}
+@keyframes tWipe{from{clip-path:inset(0 100% 0 0)}to{clip-path:inset(0 0 0 0)}}
+@keyframes tCircle{from{clip-path:circle(0% at 50% 40%)}to{clip-path:circle(150% at 50% 40%)}}
+@keyframes tBlur{from{opacity:0;filter:blur(30px);transform:scale(1.08)}to{opacity:1;filter:none;transform:none}}
+@keyframes tLeave{from{opacity:1;transform:none}to{opacity:0;transform:scale(.94)}}
+
+/* element animations: add class="a-xxx" + style="--d:1.2s" (delay after slide enters) */
+.slide [class*="a-"]{opacity:0}
+.slide.run .a-fadeUp{animation:fadeUp .8s cubic-bezier(.2,.8,.2,1) var(--d,0s) both}
+.slide.run .a-fade{animation:tFade .8s ease var(--d,0s) both}
+.slide.run .a-pop{animation:pop .7s cubic-bezier(.3,1.6,.5,1) var(--d,0s) both}
+.slide.run .a-left{animation:fromLeft .8s cubic-bezier(.2,.8,.2,1) var(--d,0s) both}
+.slide.run .a-right{animation:fromRight .8s cubic-bezier(.2,.8,.2,1) var(--d,0s) both}
+.slide.run .a-grow{animation:growX 1.2s cubic-bezier(.2,.8,.2,1) var(--d,0s) both;transform-origin:left center}
+.slide.run .a-growY{animation:growY 1.2s cubic-bezier(.2,.8,.2,1) var(--d,0s) both;transform-box:fill-box;transform-origin:center bottom}
+.slide.run .a-draw{opacity:1;stroke-dasharray:var(--len,2000);stroke-dashoffset:var(--len,2000);animation:draw 2s ease var(--d,0s) forwards}
+.slide.run .a-spin{animation:tFade .5s var(--d,0s) both,spin 8s linear var(--d,0s) infinite;transform-box:fill-box;transform-origin:center}
+.slide.run .a-pulse{animation:tFade .5s var(--d,0s) both,pulse 1.8s ease-in-out var(--d,0s) infinite;transform-box:fill-box;transform-origin:center}
+.slide.run .a-float{animation:tFade .5s var(--d,0s) both,float 3s ease-in-out var(--d,0s) infinite}
+.slide.run .a-blink{animation:blink 1.2s ease-in-out var(--d,0s) infinite}
+.slide.run .a-type{animation:type 1.6s steps(24) var(--d,0s) both;overflow:hidden;white-space:nowrap;display:inline-block}
+@keyframes fadeUp{from{opacity:0;transform:translateY(60px)}to{opacity:1;transform:none}}
+@keyframes pop{0%{opacity:0;transform:scale(.3)}100%{opacity:1;transform:none}}
+@keyframes fromLeft{from{opacity:0;transform:translateX(-200px)}to{opacity:1;transform:none}}
+@keyframes fromRight{from{opacity:0;transform:translateX(200px)}to{opacity:1;transform:none}}
+@keyframes growX{from{opacity:1;transform:scaleX(0)}to{opacity:1;transform:none}}
+@keyframes growY{from{opacity:1;transform:scaleY(0)}to{opacity:1;transform:none}}
+@keyframes draw{to{stroke-dashoffset:0}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.12)}}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-18px)}}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.25}}
+@keyframes type{from{opacity:1;max-width:0}to{opacity:1;max-width:100%}}
+
+/* subtitles */
+#subs{position:absolute;left:48px;right:48px;top:1540px;height:220px;display:flex;align-items:center;justify-content:center;z-index:6}
+#subText{font-size:46px;line-height:1.5;font-weight:700;text-align:center;padding:22px 36px;border-radius:28px;
+  background:rgba(0,0,0,.55);border:2px solid var(--line);max-width:100%;text-shadow:0 2px 6px #000;transition:opacity .25s}
+#subText:empty{opacity:0}
+#subText.swap{animation:subIn .35s ease both}
+@keyframes subIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+
+/* controls */
+#controls{position:absolute;left:0;right:0;bottom:0;height:150px;padding:0 48px 30px;z-index:8;display:flex;flex-direction:column;justify-content:flex-end;gap:18px}
+#progress{position:relative;height:16px;border-radius:8px;background:rgba(255,255,255,.15);cursor:pointer}
+#progressFill{position:absolute;left:0;top:0;bottom:0;border-radius:8px;background:linear-gradient(90deg,var(--accent),var(--accent2));width:0}
+#progress .tick{position:absolute;top:-4px;width:4px;height:24px;background:rgba(255,255,255,.55);border-radius:2px}
+#btnRow{display:flex;align-items:center;gap:22px}
+#btnRow button{width:76px;height:76px;border-radius:50%;border:2px solid var(--line);background:rgba(255,255,255,.1);color:var(--ink);font-size:34px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+#btnRow button:hover{background:rgba(255,255,255,.22)}
+#btnRow #btnPlay{width:92px;height:92px;font-size:40px;background:var(--accent);color:#0b1020;border:none}
+#time{margin-left:auto;font-size:32px;color:var(--muted);font-variant-numeric:tabular-nums}
+#homeLink{font-size:28px;color:var(--muted);text-decoration:none;border:2px solid var(--line);padding:10px 20px;border-radius:999px}
+
+/* start overlay */
+#startOverlay{position:absolute;inset:0;z-index:20;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:44px;
+  background:rgba(5,10,25,.82);backdrop-filter:blur(8px);text-align:center;padding:80px}
+#startOverlay .sTag{font-size:40px;font-weight:800;padding:12px 36px;border-radius:999px;background:var(--accent);color:#0b1020}
+#startOverlay h1{font-size:84px;line-height:1.25;font-weight:900}
+#startOverlay p{font-size:36px;color:var(--muted);line-height:1.6}
+#startBtn{width:240px;height:240px;border-radius:50%;border:none;background:var(--accent);color:#0b1020;font-size:100px;cursor:pointer;
+  box-shadow:0 0 0 0 color-mix(in srgb,var(--accent) 70%,transparent);animation:ring 2s infinite}
+@keyframes ring{0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--accent) 60%,transparent)}100%{box-shadow:0 0 0 60px transparent}}
+#endOverlay{position:absolute;inset:0;z-index:19;display:none;flex-direction:column;align-items:center;justify-content:center;gap:40px;background:rgba(5,10,25,.8);text-align:center}
+#endOverlay h1{font-size:80px}
+#endOverlay button,#endOverlay a{font-size:40px;padding:22px 56px;border-radius:999px;border:none;background:var(--accent);color:#0b1020;font-weight:800;cursor:pointer;text-decoration:none}
+.slide svg [class*="a-"]{transform-box:fill-box;transform-origin:center}
+</style>
+</head>
+<body>
+<div id="viewport"><div id="stage">
+  <div class="bgdots" id="bgdots"></div>
+  <div id="header"><span id="subjectTag"></span><span id="lessonTitle"></span></div>
+  <div id="sectionBar"><span id="sectionName"></span><span id="pageNo"></span></div>
+  <div id="slides"></div>
+  <div id="subs"><div id="subText"></div></div>
+  <div id="controls">
+    <div id="progress"><div id="progressFill"></div></div>
+    <div id="btnRow">
+      <button id="btnPrev" title="上一頁">⏮</button>
+      <button id="btnPlay" title="播放/暫停">▶</button>
+      <button id="btnNext" title="下一頁">⏭</button>
+      <button id="btnMute" title="旁白開關">🔊</button>
+      <a id="homeLink" href="../index.html">← 首頁</a>
+      <span id="time">00:00 / 05:00</span>
+    </div>
+  </div>
+  <div id="startOverlay">
+    <span class="sTag" id="sTag"></span>
+    <h1 id="sTitle"></h1>
+    <p id="sDesc"></p>
+    <button id="startBtn" aria-label="開始播放">▶</button>
+    <p>點擊開始播放（約 5 分鐘・含旁白配音與字幕）<br>空白鍵：播放/暫停　←/→：上/下一頁</p>
+  </div>
+  <div id="endOverlay"><h1>🎉 本課結束</h1><button id="replayBtn">↻ 重新播放</button><a href="../index.html">回到首頁</a></div>
+</div></div>
+
+<script>
+/* ===================== LESSON CONTENT (edit this part) ===================== */
+const LESSON = {"subject":"公民","title":"所有權的物權特性","desc":"所有權的四大特性、法律保障與限制","lang":"zh-TW","theme":{"accent":"#34d399","accent2":"#fb923c","accent3":"#fde047","bg1":"#0b1324","bg2":"#16233f"}};
+const SLIDES = (()=>{
+const A='var(--accent)',B='var(--accent2)',C='var(--accent3)',M='var(--muted)',RED='#f87171';
+const person=(x,y,c,label,s=1)=>`<g transform="translate(${x},${y}) scale(${s})"><circle cx="0" cy="-58" r="26" fill="${c}"/><path d="M-40 18 Q-40 -26 0 -26 Q40 -26 40 18 Z" fill="${c}"/>${label?`<text x="0" y="60" text-anchor="middle" font-size="32" font-weight="700">${label}</text>`:''}</g>`;
+const laptop=(x,y,s=1,c=C)=>`<g transform="translate(${x},${y}) scale(${s})"><rect x="-58" y="-78" width="116" height="76" rx="8" fill="none" stroke="${c}" stroke-width="6"/><rect x="-46" y="-66" width="92" height="52" fill="${c}" opacity=".28"/><path d="M-78 8 L78 8 L66 -4 L-66 -4 Z" fill="${c}"/></g>`;
+const house=(x,y,s=1,c=A)=>`<g transform="translate(${x},${y}) scale(${s})"><path d="M-60 0 L0 -54 L60 0 Z" fill="${c}"/><rect x="-46" y="0" width="92" height="64" fill="none" stroke="${c}" stroke-width="6"/><rect x="-14" y="24" width="28" height="40" fill="${c}"/></g>`;
+const pill=(x,y,t,c,w=240,fs=34)=>`<rect x="${x-w/2}" y="${y-38}" width="${w}" height="76" rx="38" fill="${c}" fill-opacity=".18" stroke="${c}" stroke-width="4"/><text x="${x}" y="${y+12}" text-anchor="middle" font-size="${fs}" font-weight="800">${t}</text>`;
+const box=(x,y,w,h,c,op=.12)=>`<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="28" fill="${c}" fill-opacity="${op}" stroke="${c}" stroke-width="4"/>`;
+const T=(x,y,t,fs=32,fill='var(--ink)',anchor='middle',w=400)=>`<text x="${x}" y="${y}" text-anchor="${anchor}" font-size="${fs}" fill="${fill}" font-weight="${w}">${t}</text>`;
+const arrowDefs=`<defs><marker id="cvAr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0L10 5L0 10z" fill="var(--ink)"/></marker><marker id="cvArA" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0L10 5L0 10z" fill="var(--accent)"/></marker><marker id="cvArB" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0L10 5L0 10z" fill="var(--accent2)"/></marker></defs>`;
+const xmark=(x,y,s=1)=>`<g transform="translate(${x},${y}) scale(${s})"><path d="M-20 -20 L20 20 M20 -20 L-20 20" stroke="${RED}" stroke-width="9" stroke-linecap="round"/></g>`;
+const check=(x,y,s=1)=>`<g transform="translate(${x},${y}) scale(${s})"><path d="M-22 0 L-6 16 L24 -18" stroke="${A}" stroke-width="9" fill="none" stroke-linecap="round" stroke-linejoin="round"/></g>`;
+let svN=0;const SV=(h,inner)=>{const k=++svN;return `<svg viewBox="0 0 952 ${h}" width="952" height="${h}">${arrowDefs.replace(/id="cvAr/g,'id="cv'+k+'Ar')}${inner.replace(/url\(#cvAr/g,'url(#cv'+k+'Ar')}</svg>`;};
+
+return [
+/* 1 標題 */
+{section:"引言",dur:16,trans:"zoom",
+html:`<h2 class="a-fadeUp">所有權的<span class="hl">物權特性</span></h2>
+${SV(1000,`
+<circle class="a-pop" style="--d:.4s" cx="476" cy="420" r="180" fill="${A}" fill-opacity=".12" stroke="${A}" stroke-width="6"/>
+<g class="a-pop" style="--d:.8s">${laptop(476,420,1.8)}</g>
+<text class="a-fade" style="--d:1.2s" x="476" y="540" text-anchor="middle" font-size="48" font-weight="900" fill="${C}">所有權</text>
+<line class="a-draw" style="--len:120;--d:1.6s" x1="476" y1="240" x2="476" y2="150" stroke="${A}" stroke-width="5"/>
+<line class="a-draw" style="--len:120;--d:1.8s" x1="656" y1="420" x2="740" y2="420" stroke="${A}" stroke-width="5"/>
+<line class="a-draw" style="--len:120;--d:2s" x1="476" y1="600" x2="476" y2="690" stroke="${A}" stroke-width="5"/>
+<line class="a-draw" style="--len:120;--d:2.2s" x1="296" y1="420" x2="212" y2="420" stroke="${A}" stroke-width="5"/>
+<g class="a-pop" style="--d:1.8s">${pill(476,110,'使用',A,200)}</g>
+<g class="a-pop" style="--d:2.4s">${pill(830,420,'收益',B,180)}</g>
+<g class="a-pop" style="--d:3s">${pill(476,730,'處分',C,200)}</g>
+<g class="a-pop" style="--d:3.6s">${pill(122,420,'排除干涉',A,236,32)}</g>
+<g class="a-fadeUp" style="--d:5s">${T(476,860,'公民與社會｜權利關係與財產權保障',34,M)}</g>
+<g class="a-fadeUp" style="--d:7s">${T(476,935,'物權特性 × 法律保障 × 所有權限制',36,C,'middle',800)}</g>`)}`,
+lines:["同學好，今天來學所有權的物權特性。", "電腦、房子，為什麼能說是我的？", "法律又怎麼保障、怎麼限制它？", "我們用小辰的電腦當例子。"]},
+
+/* 2 由來 */
+{section:"引言",dur:19,trans:"fade",
+html:`<h2 class="a-fadeUp">私有財產權的<span class="hl">由來</span></h2>
+${SV(1000,`
+<line class="a-draw" style="--len:840;--d:.3s" x1="90" y1="80" x2="90" y2="920" stroke="${A}" stroke-width="6"/>
+<g class="a-pop" style="--d:4s"><circle cx="90" cy="170" r="30" fill="${C}"/></g>
+<g class="a-left" style="--d:4.4s">${box(160,60,770,220,C)}${T(190,130,'古羅馬時期',40,C,'start',900)}${T(190,195,'「私有財產神聖不可侵犯」',36,'var(--ink)','start',700)}${T(190,250,'奠定維護私有財產權的原則',32,M,'start')}</g>
+<g class="a-pop" style="--d:8.5s"><circle cx="90" cy="460" r="30" fill="${B}"/></g>
+<g class="a-left" style="--d:8.9s">${box(160,350,770,230,B)}${T(190,420,'工業革命後',40,B,'start',900)}${T(190,485,'工人領取薪資維持生活',34,'var(--ink)','start')}${T(190,545,'→ 勤奮工作的動力、資源更有效率',32,M,'start')}</g>
+<g class="a-pop" style="--d:15s"><circle cx="90" cy="760" r="30" fill="${A}"/></g>
+<g class="a-left" style="--d:15.4s">${box(160,650,770,250,A)}${T(190,720,'現代民主國家',40,A,'start',900)}${T(190,785,'憲法第 15 條',38,'var(--ink)','start',800)}${T(190,850,'「人民之財產權，應予保障」',34,C,'start',700)}</g>`)}`,
+lines:["財產權讓人民自由使用、收益和處分財產。", "古羅馬奠定私有財產神聖不可侵犯原則。", "工業革命後，它成為勤奮工作的動力。", "我國憲法第十五條也明定財產權應予保障。"]},
+
+/* 3 主體客體 */
+{section:"引言",dur:21,trans:"slide",
+html:`<h2 class="a-fadeUp">權利<span class="hl">主體</span>與<span class="hl">客體</span></h2>
+${SV(1000,`
+<g class="a-pop" style="--d:0.5s">${person(150,170,A,'人（主體）',1.3)}</g>
+<line class="a-draw" style="--len:260;--d:1.4s" x1="250" y1="140" x2="470" y2="140" stroke="var(--ink)" stroke-width="5" marker-end="url(#cvAr)"/>
+<g class="a-fade" style="--d:1.7s">${T(360,115,'支配',30,M)}</g>
+<g class="a-right" style="--d:2.1s">${box(490,40,440,220,C)}${T(710,105,'權利客體',38,C,'middle',900)}${T(710,165,'物',40,'var(--ink)','middle',800)}${T(710,225,'專利權、著作權（精神產物）',28,M)}</g>
+<path class="a-draw" style="--len:500;--d:8.5s" d="M710 260 L710 330 L240 330 L240 400 M710 330 L710 400" stroke="${A}" stroke-width="5" fill="none"/>
+<g class="a-pop" style="--d:9.5s">${box(40,410,400,520,A)}${T(240,475,'不動產',42,A,'middle',900)}</g>
+<g class="a-fade" style="--d:10.4s">${house(240,580,1.3)}<rect x="90" y="680" width="300" height="16" rx="8" fill="#a16207"/>${T(240,760,'土地',34)}${T(240,815,'附著土地的定著物',30,M)}${T(240,865,'（例如：房子）',30,M)}</g>
+<g class="a-pop" style="--d:13.3s">${box(510,410,420,520,B)}${T(720,475,'動產',42,B,'middle',900)}</g>
+<g class="a-fade" style="--d:14.2s"><rect x="600" y="520" width="56" height="96" rx="10" fill="none" stroke="${B}" stroke-width="5"/><path d="M740 520 L770 540 L800 520 L830 540 L820 616 L720 616 L710 540 Z" fill="${B}" fill-opacity=".5"/>${T(720,690,'手機、衣服、汽機車',32)}</g>
+<g class="a-pop" style="--d:18.0s"><g transform="translate(640,800)"><ellipse cx="0" cy="10" rx="26" ry="20" fill="${C}"/><circle cx="-26" cy="-22" r="10" fill="${C}"/><circle cx="-8" cy="-34" r="10" fill="${C}"/><circle cx="12" cy="-34" r="10" fill="${C}"/><circle cx="28" cy="-20" r="10" fill="${C}"/></g>${T(760,815,'寵物也是！',32,C,'middle',800)}</g>`)}`,
+lines:["民法以人為權利主體，以物為權利客體。", "客體也包括專利權、著作權等精神產物。", "物分成不動產和動產。", "土地、房子是不動產；手機、機車是動產。", "法律上，連寵物也算是動產喔！"]},
+
+/* 4 物權 vs 債權 */
+{section:"所有權是什麼",dur:22,trans:"up",
+html:`<h2 class="a-fadeUp"><span class="hl">物權</span> vs <span class="c2">債權</span></h2>
+${SV(1000,`
+<g class="a-left" style="--d:0.8s">${box(10,10,440,960,A,.08)}${T(230,80,'物權',48,A,'middle',900)}</g>
+<g class="a-right" style="--d:0.8s">${box(502,10,440,960,B,.08)}${T(722,80,'債權',48,B,'middle',900)}</g>
+<g class="a-pop" style="--d:0.8s"><circle cx="476" cy="80" r="40" fill="var(--bg1)" stroke="var(--ink)" stroke-width="3"/>${T(476,92,'VS',32,'var(--ink)','middle',900)}</g>
+<g class="a-fade" style="--d:2.8s">${person(110,270,A,'權利人')}</g>
+<line class="a-draw" style="--len:150;--d:3.3s" x1="160" y1="230" x2="290" y2="230" stroke="${A}" stroke-width="6" marker-end="url(#cvArA)"/>
+<g class="a-pop" style="--d:3.6s">${laptop(350,250,.9)}</g>
+${T(230,150,'直接支配「物」',30,A,'middle',700)}
+<g class="a-fade" style="--d:6.6s">${person(90,430,M,'',.6)}${person(230,430,M,'',.6)}${person(370,430,M,'',.6)}${xmark(90,470,.7)}${xmark(230,470,.7)}${xmark(370,470,.7)}${T(230,520,'任何人都不得干涉',30,M)}</g>
+<g class="a-fadeUp" style="--d:8.1s">${T(40,620,'對象：物',32,'var(--ink)','start',700)}${T(40,690,'效力：絕對權',32,'var(--ink)','start',700)}${T(40,745,'（對不特定人主張）',28,M,'start')}${T(40,820,'特色：排他性',32,'var(--ink)','start',700)}</g>
+<g class="a-pop" style="--d:19.0s">${pill(230,900,'例：所有權',A,300,32)}</g>
+<g class="a-fade" style="--d:10.4s">${person(600,270,B,'甲')}${person(850,270,B,'乙')}</g>
+<line class="a-draw" style="--len:150;--d:10.9s" x1="650" y1="230" x2="790" y2="230" stroke="${B}" stroke-width="6" marker-end="url(#cvArB)"/>
+${T(722,150,'向「特定人」請求',30,B,'middle',700)}
+<g class="a-fade" style="--d:12.3s">${person(722,430,M,'',.6)}${T(722,520,'其他人不受拘束',30,M)}</g>
+<g class="a-fadeUp" style="--d:13.3s">${T(532,620,'對象：特定人',32,'var(--ink)','start',700)}${T(532,690,'效力：相對權',32,'var(--ink)','start',700)}${T(532,745,'（只對特定人主張）',28,M,'start')}${T(532,820,'只有相對效力',32,'var(--ink)','start',700)}</g>
+<g class="a-pop" style="--d:13.8s">${pill(722,900,'例：買賣契約',B,300,32)}</g>`)}`,
+lines:["先分清楚物權和債權。", "物權是對物直接支配、享受利益的權利。", "可對任何人主張，叫絕對權。", "債權只能向特定人主張，例如買賣契約，", "只有相對效力，叫相對權。", "所有權就是最典型的物權。"]},
+
+/* 5 權能 */
+{section:"所有權是什麼",dur:18,trans:"flip",
+html:`<h2 class="a-fadeUp">所有權的<span class="hl">四項權能</span></h2>
+<p class="a-fade muted" style="--d:0.9s;font-size:34px;margin-bottom:10px">自由使用、收益、處分所有物，並排除他人干涉</p>
+${SV(900,`
+<circle class="a-pop" style="--d:0.4s" cx="476" cy="440" r="120" fill="${C}" fill-opacity=".12" stroke="${C}" stroke-width="5"/>
+<g class="a-pop" style="--d:0.7s">${laptop(476,450,1.1)}</g>${T(476,520,'所有物',30,C,'middle',800)}
+<g class="a-left" style="--d:7.5s">${box(20,40,390,240,A)}${T(215,120,'① 使用',46,A,'middle',900)}${T(215,185,'自己拿來用',32)}${T(215,240,'例：用電腦打報告',30,M)}</g>
+<g class="a-right" style="--d:8.8s">${box(542,40,390,240,B)}${T(737,120,'② 收益',46,B,'middle',900)}${T(737,185,'取得孳息利益',32)}${T(737,240,'例：出租收租金',30,M)}</g>
+<g class="a-left" style="--d:12.4s">${box(20,600,390,240,C)}${T(215,680,'③ 處分',46,C,'middle',900)}${T(215,745,'決定物的命運',32)}${T(215,800,'例：賣掉、送人',30,M)}</g>
+<g class="a-right" style="--d:14.6s">${box(542,600,390,240,RED)}${T(737,680,'④ 排除干涉',46,RED,'middle',900)}${T(737,745,'不准他人侵擾',32)}${T(737,800,'例：不讓人亂動',30,M)}</g>
+<path class="a-draw" style="--len:200;--d:7.9s" d="M380 280 L400 340" stroke="${A}" stroke-width="5"/>
+<path class="a-draw" style="--len:200;--d:9.3s" d="M572 280 L552 340" stroke="${B}" stroke-width="5"/>
+<path class="a-draw" style="--len:200;--d:12.8s" d="M380 600 L400 540" stroke="${C}" stroke-width="5"/>
+<path class="a-draw" style="--len:200;--d:15.0s" d="M572 600 L552 540" stroke="${RED}" stroke-width="5"/>`)}`,
+lines:["所有權人可以自由使用、收益、處分所有物，", "並且排除他人干涉。", "使用是自己用，收益像是出租收租金，", "處分是賣掉或送人，排除干涉是不准別人亂動。"]},
+
+/* 6 為何保障 */
+{section:"所有權是什麼",dur:24,trans:"wipe",
+html:`<h2 class="a-fadeUp">國家為何<span class="hl">保障</span>所有權？</h2>
+${SV(1000,`
+<g class="a-fade" style="--d:2s">${T(476,40,'現代市場經濟制度的核心',36,C,'middle',800)}</g>
+<g class="a-pop" style="--d:5s">${box(10,90,270,170,A)}${T(145,165,'所有權',34,'var(--ink)','middle',800)}${T(145,215,'界定清楚',34,'var(--ink)','middle',800)}</g>
+<line class="a-draw" style="--len:60;--d:6s" x1="285" y1="175" x2="335" y2="175" stroke="var(--ink)" stroke-width="5" marker-end="url(#cvAr)"/>
+<g class="a-pop" style="--d:6.5s">${box(341,90,270,170,B)}${T(476,165,'透過交易',34,'var(--ink)','middle',800)}${T(476,215,'分配物品',34,'var(--ink)','middle',800)}</g>
+<line class="a-draw" style="--len:60;--d:8s" x1="616" y1="175" x2="666" y2="175" stroke="var(--ink)" stroke-width="5" marker-end="url(#cvAr)"/>
+<g class="a-pop" style="--d:8.5s">${box(672,90,270,170,C)}${T(807,165,'雙方利益',34,'var(--ink)','middle',800)}${T(807,215,'最大化',34,'var(--ink)','middle',800)}</g>
+<g class="a-fade" style="--d:12s">
+<polygon points="476,560 430,860 522,860" fill="${M}"/>
+<g class="a-fade" style="--d:12.5s"><line x1="140" y1="560" x2="812" y2="560" stroke="var(--ink)" stroke-width="8" stroke-linecap="round"/>
+<line x1="200" y1="560" x2="150" y2="680" stroke="var(--ink)" stroke-width="3"/><line x1="200" y1="560" x2="250" y2="680" stroke="var(--ink)" stroke-width="3"/>
+<line x1="752" y1="560" x2="702" y2="680" stroke="var(--ink)" stroke-width="3"/><line x1="752" y1="560" x2="802" y2="680" stroke="var(--ink)" stroke-width="3"/></g>
+</g>
+<g class="a-pop" style="--d:13s">${box(30,680,340,150,A,.2)}${T(200,745,'憲法第 15 條',32,A,'middle',800)}${T(200,800,'財產權應予保障',32)}</g>
+<g class="a-pop" style="--d:16s">${box(582,680,340,150,B,.2)}${T(752,745,'公共利益',32,B,'middle',800)}${T(752,800,'正當程序限制',32)}</g>
+<g class="a-fadeUp" style="--d:20s">${pill(476,935,'所有權 ≠ 絕對保護',C,480,36)}</g>`)}`,
+lines:["國家為什麼要保障所有權呢？", "保障私有財產是市場經濟的核心。", "所有權界定清楚，人們才能透過交易分配物品，", "達成彼此最大利益。", "但為了公共利益，國家可經正當程序加以限制，", "所以所有權不是絕對的保護。"]},
+
+/* 7 負面影響 */
+{section:"所有權是什麼",dur:22,trans:"circle",
+html:`<h2 class="a-fadeUp">減少對他人的<span class="hl">負面影響</span></h2>
+${SV(1000,`
+<g class="a-fade" style="--d:.5s"><path d="M0 330 C150 280 300 380 476 330 S800 280 952 330 L952 420 C800 370 650 470 476 420 S150 370 0 420 Z" fill="#38bdf8" fill-opacity=".45"/></g>
+<g class="a-left" style="--d:2s"><rect x="40" y="120" width="210" height="120" fill="none" stroke="${B}" stroke-width="6"/><path d="M30 120 L145 50 L260 120 Z" fill="${B}"/>${T(145,200,'養豬場',32,B,'middle',800)}</g>
+<path class="a-draw" style="--len:200;--d:3.5s" d="M250 210 C320 220 330 280 360 340" stroke="#a16207" stroke-width="16" fill="none" stroke-linecap="round"/>
+<g class="a-fade" style="--d:4.5s"><ellipse cx="420" cy="370" rx="120" ry="30" fill="#78350f" fill-opacity=".85"/>${T(420,382,'廢水',30,C,'middle',800)}</g>
+<g class="a-pop" style="--d:5.5s">${box(560,90,370,170,RED,.15)}${T(745,160,'無主物？',36,RED,'middle',900)}${T(745,215,'全民承受公害',34)}</g>
+<g class="a-fade" style="--d:10s">${T(476,520,'社會契約論的解方',38,C,'middle',900)}</g>
+<g class="a-pop" style="--d:11s">${person(110,690,A,'人民',1)}</g>
+<line class="a-draw" style="--len:120;--d:12s" x1="180" y1="660" x2="290" y2="660" stroke="var(--ink)" stroke-width="5" marker-end="url(#cvAr)"/>
+<g class="a-fade" style="--d:12s">${T(235,630,'讓渡權利',28,M)}</g>
+<g class="a-pop" style="--d:13s">${box(300,580,330,170,A)}${T(465,650,'政府支配管理',34,'var(--ink)','middle',800)}${T(465,705,'自然資源',32,M)}</g>
+<line class="a-draw" style="--len:80;--d:15s" x1="635" y1="665" x2="700" y2="665" stroke="var(--ink)" stroke-width="5" marker-end="url(#cvAr)"/>
+<g class="a-pop" style="--d:15.5s">${box(706,580,236,170,B)}${T(824,650,'法律防止',34,'var(--ink)','middle',800)}${T(824,705,'環境公害',34,'var(--ink)','middle',800)}</g>
+<g class="a-fadeUp" style="--d:19s">${box(120,820,712,120,C,.15)}${T(476,895,'無法完全避免 → 透過協商處理',36,C,'middle',800)}</g>`)}`,
+lines:["若河川是無主物，有人排放廢水汙染，", "全體人民只能承受公害。", "依社會契約論，人民讓渡部分權利給國家，", "由政府管理自然資源，用法律防止公害。", "無法完全避免時，也能透過協商處理。"]},
+
+/* 8 直接支配性 */
+{section:"四大特性",dur:17,trans:"blur",
+html:`<h2 class="a-fadeUp">特性一：<span class="hl">直接支配性</span></h2>
+${SV(1000,`
+<g class="a-pop" style="--d:0.6s">${pill(118,50,'① 直接支配',A,226,30)}</g>
+<g class="a-pop" style="--d:0.9s">${pill(357,50,'② 保護絕對',M,226,30)}</g>
+<g class="a-pop" style="--d:1.2s">${pill(595,50,'③ 排他',M,226,30)}</g>
+<g class="a-pop" style="--d:1.6s">${pill(834,50,'④ 優先',M,226,30)}</g>
+<g class="a-pop" style="--d:3.9s">${person(380,360,A,'小辰',1.4)}${laptop(570,350,1.3)}</g>
+<g class="a-pulse" style="--d:7.0s">${box(300,170,352,80,C,.2)}${T(476,222,'不需他人同意或許可',32,C,'middle',800)}</g>
+<path class="a-draw" style="--len:400;--d:10.9s" d="M476 460 L170 650" stroke="${A}" stroke-width="5" marker-end="url(#cvArA)"/>
+<path class="a-draw" style="--len:200;--d:11.7s" d="M476 460 L476 650" stroke="${A}" stroke-width="5" marker-end="url(#cvArA)"/>
+<path class="a-draw" style="--len:400;--d:12.4s" d="M476 460 L782 650" stroke="${A}" stroke-width="5" marker-end="url(#cvArA)"/>
+<g class="a-pop" style="--d:11.3s">${box(40,670,260,150,A)}${T(170,740,'自己使用',36,'var(--ink)','middle',800)}${T(170,790,'占有・使用',28,M)}</g>
+<g class="a-pop" style="--d:12.1s">${box(346,670,260,150,B)}${T(476,740,'送人',36,'var(--ink)','middle',800)}${T(476,790,'處分',28,M)}</g>
+<g class="a-pop" style="--d:12.8s">${box(652,670,260,150,C)}${T(782,740,'賣掉',36,'var(--ink)','middle',800)}${T(782,790,'處分・收益',28,M)}</g>
+<g class="a-fadeUp" style="--d:14.0s">${T(476,910,'依照自己的意思，決定如何使用',36,A,'middle',800)}</g>`)}`,
+lines:["所有權有四種特性，第一是直接支配性。", "不需別人同意，就能依自己的意思，", "占有、使用、收益與處分。", "小辰可以決定電腦要自用、送人或賣掉。"]},
+
+/* 9 保護絕對性、排他性 */
+{section:"四大特性",dur:19,trans:"zoom",
+html:`<h2 class="a-fadeUp"><span class="hl">保護絕對性</span>與<span class="c2">排他性</span></h2>
+${SV(1020,`
+<g class="a-fade" style="--d:0.4s">${box(0,0,952,470,A,.06)}${T(30,60,'② 保護絕對性：可向任何人主張',36,A,'start',900)}</g>
+<g class="a-pop" style="--d:1.7s">${person(140,300,A,'小辰',1.2)}</g>
+<g class="a-pop" style="--d:2.6s"><path d="M380 150 L470 120 L560 150 L560 260 Q560 350 470 390 Q380 350 380 260 Z" fill="${A}" fill-opacity=".18" stroke="${A}" stroke-width="5"/>${laptop(470,290,.9)}</g>
+<g class="a-fade" style="--d:4.3s">${person(700,230,M,'',.6)}${person(800,300,M,'',.6)}${person(880,380,M,'',.6)}</g>
+<g class="a-fade" style="--d:4.8s"><path d="M650 220 L585 240 M760 300 L585 290 M840 370 L585 340" stroke="${RED}" stroke-width="5" stroke-dasharray="10 8"/>${xmark(610,235,.6)}${xmark(610,292,.6)}${xmark(610,340,.6)}</g>
+<g class="a-pop" style="--d:6.9s"><rect x="40" y="90" width="300" height="110" rx="24" fill="#fff" fill-opacity=".92"/><path d="M120 200 L140 230 L160 200 Z" fill="#fff" fill-opacity=".92"/><text x="190" y="135" text-anchor="middle" font-size="28" style="fill:#0b1020" font-weight="800">借你很久，</text><text x="190" y="178" text-anchor="middle" font-size="28" style="fill:#0b1020" font-weight="800">但還是我的！</text></g>
+<g class="a-fade" style="--d:9.5s">${box(0,500,952,500,B,.06)}${T(30,560,'③ 排他性：一物只有一個所有權',36,B,'start',900)}</g>
+<g class="a-pop" style="--d:10.4s">${laptop(150,740,1)}${T(150,800,'1 個物',32)}</g>
+<line class="a-draw" style="--len:120;--d:11.2s" x1="230" y1="700" x2="320" y2="700" stroke="var(--ink)" stroke-width="5" marker-end="url(#cvAr)"/>
+<g class="a-pop" style="--d:11.7s">${pill(400,700,'1 個所有權',B,190,28)}${check(400,790,1)}</g>
+<line class="a-fade" style="--d:13.8s" x1="520" y1="600" x2="520" y2="960" stroke="var(--line)" stroke-width="4"/>
+<g class="a-pop" style="--d:14.7s">${laptop(735,720,.9)}${person(610,880,C,'',.6)}${person(735,900,C,'',.6)}${person(860,880,C,'',.6)}</g>
+<g class="a-draw" style="--len:200;--d:15.1s"><path d="M610 830 L700 740 M735 850 L735 740 M860 830 L770 740" stroke="${C}" stroke-width="4" stroke-dasharray="200"/></g>
+<g class="a-fadeUp" style="--d:16.0s">${T(735,630,'共有：數人共享',34,C,'middle',900)}${T(735,975,'仍是同一個所有權',28,M)}</g>`)}`,
+lines:["第二是保護絕對性，可以向任何人主張，", "任何人都不得干涉。電腦借人再久，還是小辰的。", "第三是排他性：一物只有一個所有權，", "但可以由數人共享，叫做共有。"]},
+
+/* 10 優先性 */
+{section:"四大特性",dur:26,trans:"fade",
+html:`<h2 class="a-fadeUp">特性四：<span class="hl">優先性</span></h2>
+${SV(1020,`
+<g class="a-fade" style="--d:.5s">${box(120,0,712,90,C,.15)}${T(476,60,'同一物：所有權（物權） ＞ 債權',36,C,'middle',900)}</g>
+<g class="a-fade" style="--d:7s">${T(20,170,'①',40,B,'start',900)}${T(80,170,'約定買賣',34,B,'start',800)}</g>
+<g class="a-pop" style="--d:7.5s">${person(200,330,A,'小辰')}${person(760,330,B,'元元')}</g>
+<line class="a-draw" style="--len:440;--d:8.5s" x1="270" y1="290" x2="690" y2="290" stroke="${B}" stroke-width="5" stroke-dasharray="14 10"/>
+<g class="a-fade" style="--d:9s">${T(480,270,'$5000 賣我好嗎？好呀！',30)}${T(480,340,'買賣契約＝債權',30,B,'middle',800)}</g>
+<g class="a-fade" style="--d:11s">${T(20,470,'②',40,A,'start',900)}${T(80,470,'反悔改賣＋交付',34,A,'start',800)}</g>
+<g class="a-pop" style="--d:11.5s">${person(200,630,A,'小辰')}${person(760,630,A,'阿庭')}</g>
+<line class="a-draw" style="--len:440;--d:12.5s" x1="270" y1="590" x2="680" y2="590" stroke="${A}" stroke-width="7" marker-end="url(#cvArA)"/>
+<g class="a-left" style="--d:13s">${laptop(480,570,.7)}</g>
+<g class="a-fade" style="--d:13.5s">${T(480,640,'出價 $6000，交付電腦',30,A,'middle',800)}</g>
+<g class="a-fade" style="--d:16s">${T(20,770,'③',40,C,'start',900)}${T(80,770,'結果',34,C,'start',800)}</g>
+<g class="a-pop" style="--d:16.5s">${box(30,800,430,200,A,.18)}${T(245,870,'阿庭取得物權',36,A,'middle',900)}${T(245,930,'電腦歸阿庭',32)}${T(245,975,'（優先於元元的債權）',28,M)}</g>
+<g class="a-pop" style="--d:20s">${box(492,800,430,200,RED,.12)}${T(707,870,'元元的債權',36,RED,'middle',900)}${T(707,930,'不得主張電腦所有權',30)}${T(707,975,'（只有相對效力）',28,M)}</g>`)}`,
+lines:["第四是優先性：同一物的所有權優先於債權。", "小辰先答應五千元把電腦賣給元元，", "卻改賣給出價六千元的阿庭，並交付電腦。", "阿庭取得物權，優先於元元的債權，", "元元不能主張電腦是他的。", "債權只有相對效力，無法對抗阿庭。"]},
+
+/* 11 767 */
+{section:"所有權的保障",dur:25,trans:"slide",
+html:`<h2 class="a-fadeUp">民法第 767 條：<span class="hl">三種請求權</span></h2>
+${SV(1000,`
+<g class="a-fade" style="--d:0.9s">${T(476,40,'權利被侵害，必須有救濟方式',36,C,'middle',800)}</g>
+<g class="a-left" style="--d:6.4s">${box(0,80,952,270,A,.1)}<circle cx="80" cy="215" r="50" fill="${A}"/>${T(80,232,'1',48,'#0b1020','middle',900)}${T(160,170,'所有物返還請求權',38,A,'start',900)}${T(160,225,'他人無權占有或侵奪',32,'var(--ink)','start')}${T(160,275,'→ 請求返還',32,M,'start')}</g>
+<g class="a-pop" style="--d:8.2s"><rect x="600" y="230" width="320" height="90" rx="22" fill="#fff" fill-opacity=".92"/><text x="760" y="288" text-anchor="middle" font-size="32" style="fill:#0b1020" font-weight="800">把電腦還給我！</text></g>
+<g class="a-left" style="--d:10.1s">${box(0,380,952,270,B,.1)}<circle cx="80" cy="515" r="50" fill="${B}"/>${T(80,532,'2',48,'#0b1020','middle',900)}${T(160,470,'妨害除去請求權',38,B,'start',900)}${T(160,525,'雖未占有，但已妨害',32,'var(--ink)','start')}${T(160,575,'→ 請求除去妨害',32,M,'start')}</g>
+<g class="a-pop" style="--d:11.9s"><rect x="560" y="515" width="370" height="120" rx="22" fill="#fff" fill-opacity=".92"/><text x="745" y="565" text-anchor="middle" font-size="28" style="fill:#0b1020" font-weight="800">電腦沒辦法開機了，</text><text x="745" y="608" text-anchor="middle" font-size="28" style="fill:#0b1020" font-weight="800">請你把它修理好！</text></g>
+<g class="a-left" style="--d:14.7s">${box(0,680,952,270,C,.1)}<circle cx="80" cy="815" r="50" fill="${C}"/>${T(80,832,'3',48,'#0b1020','middle',900)}${T(160,770,'妨害防止請求權',38,C,'start',900)}${T(160,825,'可能妨害，事先要求不得做',32,'var(--ink)','start')}${T(160,875,'→ 預防妨害',32,M,'start')}</g>
+<g class="a-pop" style="--d:18.3s"><rect x="600" y="830" width="330" height="100" rx="16" fill="${C}" fill-opacity=".9"/><text x="765" y="872" text-anchor="middle" font-size="28" style="fill:#0b1020" font-weight="900">借用規範：</text><text x="765" y="912" text-anchor="middle" font-size="28" style="fill:#0b1020" font-weight="800">不可更動電腦設定</text></g>
+<g class="a-fadeUp" style="--d:22.0s">${T(476,990,'必要時可提起訴訟，請法院命對方返還或回復',30,M)}</g>`)}`,
+lines:["權利受侵害時，民法第七百六十七條提供救濟。", "一、無權占有，可請求返還所有物。", "二、電腦被弄壞，可請求除去妨害。", "三、可能被妨害，可預先請求防止，", "像借電腦時約定不可更動設定。", "必要時，也能向法院提起訴訟。"]},
+
+/* 12 限制 */
+{section:"限制與調和",dur:25,trans:"up",
+html:`<h2 class="a-fadeUp">所有權的<span class="hl">限制</span></h2>
+${SV(1000,`
+<g class="a-fade" style="--d:0.9s">${pill(240,40,'古羅馬：絕對所有權',M,420,30)}</g>
+<line class="a-draw" style="--len:60;--d:2.6s" x1="455" y1="40" x2="505" y2="40" stroke="var(--ink)" stroke-width="5" marker-end="url(#cvAr)"/>
+<g class="a-fade" style="--d:3.1s">${pill(725,40,'資本主義：限制成趨勢',B,420,30)}</g>
+<g class="a-pop" style="--d:7.0s">${box(0,120,952,240,A,.12)}${T(30,185,'1. 物權法定主義',40,A,'start',900)}${T(476,255,'「物權除依法律或習慣外，不得創設」',32,'var(--ink)','middle',700)}${T(476,320,'物權優先又具絕對性 → 不能自行約定',30,M)}</g>
+<g class="a-pop" style="--d:14.1s">${box(0,390,952,420,C,.1)}${T(30,455,'2. 不動產登記生效主義',40,C,'start',900)}</g>
+<g class="a-fade" style="--d:16.7s">${person(110,640,B,'陳太太')}</g>
+<line class="a-draw" style="--len:180;--d:17.6s" x1="175" y1="600" x2="330" y2="600" stroke="var(--ink)" stroke-width="5" marker-end="url(#cvAr)"/>
+<g class="a-fade" style="--d:17.6s">${T(250,570,'簽約',30,M)}</g>
+<g class="a-pop" style="--d:18.0s"><rect x="345" y="520" width="260" height="170" rx="10" fill="${C}" fill-opacity=".2" stroke="${C}" stroke-width="5"/><path d="M335 520 L475 480 L615 520 Z" fill="${C}"/>${T(475,590,'地政事務所',32,'var(--ink)','middle',800)}${T(475,640,'移轉登記',32,C,'middle',900)}</g>
+<line class="a-draw" style="--len:180;--d:18.9s" x1="615" y1="600" x2="770" y2="600" stroke="${A}" stroke-width="6" marker-end="url(#cvArA)"/>
+<g class="a-pop" style="--d:19.4s">${person(840,640,A,'林先生')}${house(840,480,.6,A)}</g>
+<g class="a-fade" style="--d:19.8s">${T(476,770,'登記後才產生所有權，保障交易安全',32,C,'middle',800)}</g>
+<g class="a-fadeUp" style="--d:22.0s">${box(0,840,460,140,C,.18)}${T(230,900,'不動產',34,C,'middle',900)}${T(230,950,'非經登記，不生效力',30)}${box(492,840,460,140,B,.18)}${T(722,900,'動產',34,B,'middle',900)}${T(722,950,'交付即移轉所有權',30)}</g>`)}`,
+lines:["古羅馬採絕對所有權；資本主義興起後，", "限制所有權成為新趨勢。", "一是物權法定主義，不得自行創設物權。", "二是不動產登記生效，登記後才有所有權。", "陳太太賣屋給林先生，須到地政事務所登記。", "動產則是交付就能移轉。"]},
+
+/* 13 調和 */
+{section:"限制與調和",dur:20,trans:"flip",
+html:`<h2 class="a-fadeUp">私有財產與<span class="hl">公共利益</span></h2>
+${SV(1000,`
+<polygon class="a-fade" style="--d:0.4s" points="476,120 446,330 506,330" fill="${M}"/>
+<g class="a-fade" style="--d:0.7s"><line x1="160" y1="120" x2="792" y2="120" stroke="var(--ink)" stroke-width="8" stroke-linecap="round"/>
+<path d="M200 120 L140 210 M200 120 L260 210 M752 120 L692 210 M752 120 L812 210" stroke="var(--ink)" stroke-width="3"/></g>
+<g class="a-pop" style="--d:1.3s">${pill(200,230,'私有財產',A,260,34)}</g>
+<g class="a-pop" style="--d:1.7s">${pill(752,230,'公共利益',B,260,34)}</g>
+<g class="a-fade" style="--d:2.2s">${T(476,390,'⚖ 互相調和',38,C,'middle',900)}</g>
+<g class="a-left" style="--d:3.5s">${box(0,440,460,540,A,.08)}${T(230,500,'騎樓',40,A,'middle',900)}
+<rect x="60" y="540" width="340" height="230" fill="none" stroke="${A}" stroke-width="5"/>
+<path d="M60 680 L400 680" stroke="${A}" stroke-width="5"/>
+<rect x="60" y="680" width="40" height="90" fill="${A}" fill-opacity=".6"/><rect x="210" y="680" width="40" height="90" fill="${A}" fill-opacity=".6"/><rect x="360" y="680" width="40" height="90" fill="${A}" fill-opacity=".6"/>
+<path d="M90 560 C150 520 300 520 370 560" stroke="#38bdf8" stroke-width="4" fill="none" stroke-dasharray="6 10"/>
+</g>
+<g class="a-float" style="--d:5.2s">${person(160,760,C,'',.5)}${person(310,760,C,'',.5)}</g>
+<g class="a-fadeUp" style="--d:5.2s">${T(230,850,'一樓內縮',32)}${T(230,900,'留空間給行人',32)}${T(230,950,'遮雨又遮陽',28,M)}</g>
+<g class="a-right" style="--d:10.5s">${box(492,440,460,540,B,.08)}${T(722,500,'智慧財產權',40,B,'middle',900)}</g>
+<g class="a-pop" style="--d:11.3s">${box(522,540,400,100,B,.2)}${T(722,602,'保障創作者・鼓勵創作',30)}</g>
+<g class="a-pop" style="--d:13.9s">${box(522,670,400,100,A,.2)}${T(722,732,'開放原始碼：自由共享',30)}</g>
+<line class="a-draw" style="--len:60;--d:16.6s" x1="722" y1="780" x2="722" y2="830" stroke="var(--ink)" stroke-width="5" marker-end="url(#cvAr)"/>
+<g class="a-pop" style="--d:17.0s">${pill(722,880,'合理使用',C,300,36)}${T(722,955,'兼顧權益與發展',28,M)}</g>`)}`,
+lines:["私有財產和公共利益需要調和。", "像騎樓讓一樓內縮，保留空間給行人走。", "法律也保障智慧財產權，鼓勵創作；", "開放原始碼則追求自由共享，", "所以法律保障合理使用，兼顧雙方。"]},
+
+/* 14 總結 */
+{section:"總結",dur:24,trans:"circle",
+html:`<h2 class="a-fadeUp"><span class="hl">重點總結</span></h2>
+${SV(1080,`
+<g class="a-fade" style="--d:.5s">${box(0,0,952,280,A,.08)}${T(30,55,'四大特性',38,A,'start',900)}</g>
+<g class="a-pop" style="--d:3s">${pill(240,125,'直接支配性',A,400,34)}</g>
+<g class="a-pop" style="--d:3.8s">${pill(712,125,'保護絕對性',A,400,34)}</g>
+<g class="a-pop" style="--d:4.6s">${pill(240,220,'排他性',A,400,34)}</g>
+<g class="a-pop" style="--d:5.4s">${pill(712,220,'優先性',A,400,34)}</g>
+<g class="a-fade" style="--d:7s">${box(0,300,952,200,B,.08)}${T(30,355,'民法 767 條 三種請求權',38,B,'start',900)}</g>
+<g class="a-pop" style="--d:7.5s">${pill(165,440,'返還',B,270,34)}${pill(476,440,'除去妨害',B,270,34)}${pill(787,440,'防止妨害',B,270,34)}</g>
+<g class="a-fade" style="--d:11s">${box(0,520,952,190,C,.08)}${T(30,575,'限制',38,C,'start',900)}</g>
+<g class="a-pop" style="--d:11.5s">${pill(240,655,'物權法定主義',C,420,32)}${pill(712,655,'不動產登記生效',C,420,32)}</g>
+<g class="a-fadeUp" style="--d:15s">${box(0,740,952,330,RED,.1)}${T(30,800,'快問快答',38,RED,'start',900)}${T(30,860,'阿美先和甲約好賣機車，',32,'var(--ink)','start')}${T(30,910,'後來改賣給乙並交付，機車歸誰？',32,'var(--ink)','start')}</g>
+<g class="a-pop" style="--d:21s">${pill(476,1000,'答：乙！物權優先於債權',A,560,34)}</g>`)}`,
+lines:["總結：所有權有四大特性，", "直接支配、保護絕對、排他、優先。", "受侵害時有三種請求權，也受法律限制。", "快問快答：阿美先和甲約好賣機車，", "後來改賣乙並交付，機車歸誰？", "答案是乙，因為物權優先於債權！"]}
+];
+})();
+/* ===================== PLAYER ENGINE ===================== */
+(function(){
+const TOTAL = 300;                       // seconds
+const $ = id => document.getElementById(id);
+const stage = $('stage'), slidesEl = $('slides'), subText = $('subText');
+// theme
+const root = document.documentElement.style;
+Object.entries(LESSON.theme||{}).forEach(([k,v])=>root.setProperty('--'+k,v));
+document.title = LESSON.subject + '｜' + LESSON.title;
+$('subjectTag').textContent = LESSON.subject; $('lessonTitle').textContent = LESSON.title;
+$('sTag').textContent = LESSON.subject; $('sTitle').textContent = LESSON.title; $('sDesc').textContent = LESSON.desc||'';
+
+// background particles
+const bg=$('bgdots'); for(let i=0;i<26;i++){const s=document.createElement('span');const z=6+Math.random()*16;
+  s.style.cssText=`width:${z}px;height:${z}px;left:${Math.random()*100}%;top:${100+Math.random()*100}%;animation-duration:${30+Math.random()*40}s;animation-delay:-${Math.random()*60}s;opacity:${.3+Math.random()*.7}`;bg.appendChild(s);}
+
+// scale to fit
+function fit(){const s=Math.min(innerWidth/1080,innerHeight/1920);stage.style.transform=`scale(${s})`;}
+addEventListener('resize',fit); fit();
+
+// normalise durations to exactly TOTAL seconds
+const rawSum = SLIDES.reduce((a,s)=>a+(s.dur||20),0);
+let acc=0;
+SLIDES.forEach((s,i)=>{
+  s.d = (s.dur||20)*TOTAL/rawSum; s.start=acc; acc+=s.d;
+  const el=document.createElement('div'); el.className='slide'; el.innerHTML=s.html; slidesEl.appendChild(el); s.el=el;
+  // subtitle cue timing: proportional to text length
+  const lead=0.7, tail=0.6, span=s.d-lead-tail;
+  const lens=s.lines.map(t=>Math.max(4,t.replace(/\s+/g,'').length*(/[一-鿿]/.test(t)?1:0.45)));
+  const sum=lens.reduce((a,b)=>a+b,0); let t=s.start+lead;
+  s.cues=s.lines.map((txt,j)=>{const c={txt,start:t,end:t+span*lens[j]/sum};t=c.end;return c;});
+  if(i>0){const tk=document.createElement('div');tk.className='tick';tk.style.left=(s.start/TOTAL*100)+'%';$('progress').appendChild(tk);}
+});
+const CUES = SLIDES.flatMap((s,i)=>s.cues.map(c=>({...c,slide:i})));
+
+// speech
+const synth = window.speechSynthesis; let muted=false, holdCue=-1, holdStart=0;
+function speak(txt){
+  if(!synth||muted) return;
+  if(synth.speaking||synth.pending) synth.cancel();
+  const u=new SpeechSynthesisUtterance(txt);
+  const isEn = !/[一-鿿]/.test(txt);
+  u.lang = isEn ? 'en-US' : (LESSON.lang||'zh-TW');  // default voice for that language
+  u.rate = 1.0; u.pitch = 1.0;                         // 中等語速
+  synth.speak(u);
+}
+function stopSpeech(){ if(synth) synth.cancel(); }
+
+// state
+let t=0, playing=false, last=null, curSlide=-1, curCue=-1, ended=false;
+function fmt(x){x=Math.max(0,Math.round(x));return String(Math.floor(x/60)).padStart(2,'0')+':'+String(x%60).padStart(2,'0');}
+
+function showSlide(i, animate=true){
+  if(i===curSlide) return;
+  const prev=SLIDES[curSlide];
+  if(prev){prev.el.className='slide leave'; const pe=prev.el; setTimeout(()=>{if(pe.classList.contains('leave'))pe.className='slide';},700);}
+  const s=SLIDES[i]; curSlide=i;
+  s.el.className='slide';
+  void s.el.offsetWidth;                                   // restart animations
+  s.el.className='slide show '+(animate?('enter-'+(s.trans||'fade')):'')+' run';
+  $('sectionName').textContent = '◆ '+(s.section||'');
+  $('pageNo').textContent = (i+1)+' / '+SLIDES.length;
+}
+function setCue(k, say){
+  if(k===curCue) return; curCue=k;
+  if(k<0){subText.textContent='';return;}
+  subText.classList.remove('swap'); void subText.offsetWidth;
+  subText.textContent=CUES[k].txt; subText.classList.add('swap');
+  if(say) speak(CUES[k].txt);
+}
+function cueAt(time){for(let k=CUES.length-1;k>=0;k--){if(time>=CUES[k].start) return time<CUES[k].end+0.6?k:-1;}return -1;}
+function slideAt(time){for(let i=SLIDES.length-1;i>=0;i--) if(time>=SLIDES[i].start) return i; return 0;}
+
+function render(say=true){
+  const i=slideAt(Math.min(t,TOTAL-0.01)); showSlide(i);
+  setCue(cueAt(t), say);
+  $('progressFill').style.width=(t/TOTAL*100)+'%';
+  $('time').textContent=fmt(t)+' / '+fmt(TOTAL);
+}
+function tick(now){
+  if(!playing){last=null;return;}
+  if(last!=null){
+    let dt=(now-last)/1000; if(dt>0.5) dt=0.05;
+    // keep narration in sync: if the next cue is due but the voice is still talking, hold the clock (max 3 s)
+    const nk=curCue+1;
+    if(!muted && synth && synth.speaking && nk<CUES.length && t+dt>=CUES[nk].start){
+      if(holdCue!==nk){holdCue=nk; holdStart=now;}
+      if(now-holdStart<3000) dt=0;           // after 3 s give up waiting and move on
+    }
+    t+=dt;
+  }
+  last=now;
+  if(t>=TOTAL){t=TOTAL;render(false);finish();return;}
+  render(true);
+  requestAnimationFrame(tick);
+}
+function play(){ if(ended){restart();return;} playing=true; $('btnPlay').textContent='⏸';
+  // re-speak the current cue when resuming
+  if(curCue>=0 && !(synth&&synth.speaking)) speak(CUES[curCue].txt);
+  requestAnimationFrame(tick); }
+function pause(){ playing=false; $('btnPlay').textContent='▶'; stopSpeech(); }
+function seek(time){ stopSpeech(); t=Math.max(0,Math.min(TOTAL-0.05,time)); ended=false; $('endOverlay').style.display='none';
+  curCue=-2; holdCue=-1; render(playing); }
+function finish(){ playing=false; ended=true; $('btnPlay').textContent='▶'; stopSpeech(); subText.textContent=''; $('endOverlay').style.display='flex'; }
+function restart(){ ended=false; $('endOverlay').style.display='none'; curSlide=-1; curCue=-1; t=0; play(); }
+
+$('startBtn').onclick=()=>{ $('startOverlay').style.display='none'; if(synth){synth.cancel(); synth.speak(new SpeechSynthesisUtterance(''));} t=0; render(false); curCue=-1; play(); };
+$('btnPlay').onclick=()=>playing?pause():play();
+$('btnPrev').onclick=()=>{const i=slideAt(t); const target=(t-SLIDES[i].start>2||i===0)?i:i-1; seek(SLIDES[target].start+0.01);};
+$('btnNext').onclick=()=>{const i=slideAt(t); if(i<SLIDES.length-1) seek(SLIDES[i+1].start+0.01);};
+$('btnMute').onclick=()=>{muted=!muted; $('btnMute').textContent=muted?'🔇':'🔊'; if(muted) stopSpeech(); else if(playing&&curCue>=0) speak(CUES[curCue].txt);};
+$('replayBtn').onclick=restart;
+$('progress').onclick=e=>{const r=e.currentTarget.getBoundingClientRect(); seek((e.clientX-r.left)/r.width*TOTAL);};
+addEventListener('keydown',e=>{ if($('startOverlay').style.display!=='none'){ if(e.code==='Space'||e.code==='Enter'){e.preventDefault();$('startBtn').click();} return; }
+  if(e.code==='Space'){e.preventDefault(); playing?pause():play();}
+  if(e.code==='ArrowRight') $('btnNext').click();
+  if(e.code==='ArrowLeft') $('btnPrev').click();
+  if(e.key==='m') $('btnMute').click(); });
+// Chrome stops long speech queues while tab hidden — pause instead
+document.addEventListener('visibilitychange',()=>{ if(document.hidden && playing) pause(); });
+showSlide(0,false);
+})();
+</script>
+</body>
+</html>

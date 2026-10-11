@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>互動式教學影片館</title>
+<meta name="description" content="7 支 9:16 直式、5 分鐘自動播放的互動式視覺化教學影片網頁，含旁白配音與字幕。">
+<style>
+:root{--bg:#0b1020;--bg2:#141b33;--ink:#f1f5f9;--muted:#94a3b8;--line:rgba(255,255,255,.12)}
+*{box-sizing:border-box;margin:0;padding:0}
+body{min-height:100vh;background:radial-gradient(900px 600px at 10% -10%,rgba(56,189,248,.18),transparent 60%),radial-gradient(800px 700px at 110% 20%,rgba(244,114,182,.14),transparent 60%),linear-gradient(180deg,var(--bg),var(--bg2));
+  color:var(--ink);font-family:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif;line-height:1.6}
+.wrap{max-width:1180px;margin:0 auto;padding:0 16px}
+header{padding:72px 0 40px;text-align:center}
+.hero-svg{width:min(520px,90%);height:auto;margin:0 auto 18px;display:block}
+h1{font-size:clamp(34px,6vw,60px);font-weight:900;letter-spacing:2px;background:linear-gradient(90deg,#38bdf8,#a78bfa,#f472b6);-webkit-background-clip:text;background-clip:text;color:transparent}
+.lead{color:var(--muted);font-size:clamp(16px,2.2vw,20px);margin-top:12px}
+.stats{display:flex;justify-content:center;gap:14px;flex-wrap:wrap;margin-top:26px}
+.stat{border:1px solid var(--line);background:rgba(255,255,255,.05);border-radius:16px;padding:12px 22px;min-width:120px}
+.stat b{display:block;font-size:28px} .stat span{color:var(--muted);font-size:14px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:22px;padding:20px 0 50px}
+.card{position:relative;display:flex;flex-direction:column;gap:14px;padding:24px;border-radius:24px;text-decoration:none;color:var(--ink);
+  background:linear-gradient(160deg,color-mix(in srgb,var(--c) 16%,transparent),rgba(255,255,255,.03));border:1px solid color-mix(in srgb,var(--c) 40%,transparent);
+  transition:transform .25s,box-shadow .25s;animation:in .6s cubic-bezier(.2,.8,.2,1) both;animation-delay:calc(var(--i)*80ms)}
+.card:hover{transform:translateY(-6px);box-shadow:0 18px 40px -12px color-mix(in srgb,var(--c) 60%,transparent)}
+@keyframes in{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:none}}
+.top{display:flex;gap:16px;align-items:center}
+.icon{width:64px;height:64px;flex:none;color:var(--c);background:color-mix(in srgb,var(--c) 15%,transparent);border-radius:18px;padding:6px}
+.subj{display:inline-block;font-size:13px;font-weight:800;padding:2px 12px;border-radius:999px;background:var(--c);color:#0b1020}
+.card h2{font-size:22px;line-height:1.35;margin-top:6px}
+.desc{color:#cbd5e1;font-size:15px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font-size:12px;padding:3px 10px;border-radius:999px;border:1px solid color-mix(in srgb,var(--c) 50%,transparent);color:color-mix(in srgb,var(--c) 70%,white)}
+.kw{font-size:13px;color:var(--muted)}
+.foot{margin-top:auto;display:flex;gap:14px;align-items:center;font-size:14px;color:var(--muted)}
+.play{margin-left:auto;font-weight:800;color:#0b1020;background:var(--c);padding:8px 18px;border-radius:999px}
+section.how{border-top:1px solid var(--line);padding:40px 0}
+section.how h3{font-size:24px;margin-bottom:16px}
+.how-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px}
+.how-grid div{border:1px solid var(--line);border-radius:18px;padding:18px;background:rgba(255,255,255,.04)}
+.how-grid b{display:block;font-size:17px;margin-bottom:6px} .how-grid p{font-size:14px;color:var(--muted)}
+footer{text-align:center;color:var(--muted);font-size:13px;padding:30px 0 50px}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <svg class="hero-svg" viewBox="0 0 520 170" aria-hidden="true">
+    <defs><linearGradient id="g" x1="0" x2="1"><stop offset="0" stop-color="#38bdf8"/><stop offset=".5" stop-color="#a78bfa"/><stop offset="1" stop-color="#f472b6"/></linearGradient></defs>
+    <g fill="none" stroke="url(#g)" stroke-width="4">
+      <rect x="30" y="22" width="56" height="100" rx="10"><animate attributeName="y" values="22;34;22" dur="3.0s" repeatCount="indefinite"/></rect><rect x="98" y="36" width="56" height="100" rx="10"><animate attributeName="y" values="36;20;36" dur="3.3s" repeatCount="indefinite"/></rect><rect x="166" y="22" width="56" height="100" rx="10"><animate attributeName="y" values="22;34;22" dur="3.6s" repeatCount="indefinite"/></rect><rect x="234" y="36" width="56" height="100" rx="10"><animate attributeName="y" values="36;20;36" dur="3.9s" repeatCount="indefinite"/></rect><rect x="302" y="22" width="56" height="100" rx="10"><animate attributeName="y" values="22;34;22" dur="4.2s" repeatCount="indefinite"/></rect><rect x="370" y="36" width="56" height="100" rx="10"><animate attributeName="y" values="36;20;36" dur="4.5s" repeatCount="indefinite"/></rect><rect x="438" y="22" width="56" height="100" rx="10"><animate attributeName="y" values="22;34;22" dur="4.8s" repeatCount="indefinite"/></rect>
+    </g>
+    <path d="M30 150 H490" stroke="rgba(255,255,255,.2)" stroke-width="6" stroke-linecap="round"/>
+    <path d="M30 150 H490" stroke="url(#g)" stroke-width="6" stroke-linecap="round" stroke-dasharray="460" stroke-dashoffset="460"><animate attributeName="stroke-dashoffset" from="460" to="0" dur="5s" repeatCount="indefinite"/></path>
+  </svg>
+  <h1>互動式教學影片館</h1>
+  <p class="lead">把課本 PDF 變成 5 分鐘的直式教學影片：動畫視覺化 × 旁白配音 × 同步字幕</p>
+  <div class="stats">
+    <div class="stat"><b>7</b><span>支教學影片</span></div>
+    <div class="stat"><b>7</b><span>個學科</span></div>
+    <div class="stat"><b>104</b><span>張動畫投影片</span></div>
+    <div class="stat"><b>9:16</b><span>手機直式</span></div>
+  </div>
+</header>
+<main class="grid">
+    <a class="card" href="chinese-chu-shi-biao/index.html" style="--c:#e2533f;--i:0">
+      <div class="top"><svg class="icon" viewBox="0 0 80 80" aria-hidden="true"><path d="M20 14h40a6 6 0 0 1 6 6v46H26a6 6 0 0 1-6-6z" fill="none" stroke="currentColor" stroke-width="5"/><path d="M30 28h26M30 40h26M30 52h16" stroke="currentColor" stroke-width="5" stroke-linecap="round"/></svg>
+        <div><span class="subj">國文</span><h2>出師表</h2></div></div>
+      <p class="desc">諸葛亮北伐前上呈後主的奏章：從三國情勢、作者生平到文章結構，解析開張聖聽、賞罰分明、親賢遠小人三大建議與名句。</p>
+      <div class="chips"><span class="chip">引言</span><span class="chip">作者與背景</span><span class="chip">文章結構</span><span class="chip">三大建議</span><span class="chip">自述與期許</span><span class="chip">名句與總結</span></div>
+      <p class="kw">關鍵詞：出師表、諸葛亮、三國鼎立、開張聖聽、賞罰分明、親賢臣遠小人</p>
+      <div class="foot"><span>⏱ 5:00</span><span>🖼 14 張投影片</span><span class="play">▶ 播放</span></div>
+    </a>
+    <a class="card" href="english-lady-or-tiger/index.html" style="--c:#f59e0b;--i:1">
+      <div class="top"><svg class="icon" viewBox="0 0 80 80" aria-hidden="true"><text x="40" y="54" text-anchor="middle" font-size="40" font-weight="900" fill="currentColor" font-family="Georgia,serif">Aa</text></svg>
+        <div><span class="subj">英文</span><h2>The Lady or the Tiger?</h2></div></div>
+      <p class="desc">從競技場的兩扇門出發，認識殘酷國王、公主與青年的故事，理解公主的兩難與開放式結局，並學習 insist that 與 as…as 句型和關鍵單字。</p>
+      <div class="chips"><span class="chip">引言</span><span class="chip">故事背景</span><span class="chip">人物與衝突</span><span class="chip">高潮與結局</span><span class="chip">語言重點</span><span class="chip">總結</span></div>
+      <p class="kw">關鍵詞：The Lady or the Tiger、開放式結局、故事結局類型、人物關係、dilemma、insist that</p>
+      <div class="foot"><span>⏱ 5:00</span><span>🖼 15 張投影片</span><span class="play">▶ 播放</span></div>
+    </a>
+    <a class="card" href="math-linear-programming/index.html" style="--c:#22d3ee;--i:2">
+      <div class="top"><svg class="icon" viewBox="0 0 80 80" aria-hidden="true"><path d="M14 66V14M14 66h52" stroke="currentColor" stroke-width="5" fill="none"/><path d="M14 30l24 26 26-40" stroke="currentColor" stroke-width="5" fill="none"/><path d="M22 58l16-22 18 20z" fill="currentColor" opacity=".35"/></svg>
+        <div><span class="subj">數學</span><h2>線性規劃</h2></div></div>
+      <p class="desc">從平行直線系與二元一次不等式的圖形出發，認識可行解區域、目標函數與最佳解，學會用平行線法與頂點法解線性規劃應用題。</p>
+      <div class="chips"><span class="chip">引言</span><span class="chip">平行直線系</span><span class="chip">二元一次不等式</span><span class="chip">線性規劃</span><span class="chip">應用題</span><span class="chip">總結</span></div>
+      <p class="kw">關鍵詞：線性規劃、平行直線系、二元一次不等式、半平面、可行解區域、目標函數</p>
+      <div class="foot"><span>⏱ 5:00</span><span>🖼 15 張投影片</span><span class="play">▶ 播放</span></div>
+    </a>
+    <a class="card" href="physics-friction/index.html" style="--c:#fb923c;--i:3">
+      <div class="top"><svg class="icon" viewBox="0 0 80 80" aria-hidden="true"><rect x="24" y="34" width="32" height="22" rx="3" fill="none" stroke="currentColor" stroke-width="5"/><path d="M10 60h60" stroke="currentColor" stroke-width="5"/><path d="M56 45h16m-6-6 6 6-6 6" stroke="currentColor" stroke-width="5" fill="none"/><path d="M24 45H8m6-6-6 6 6 6" stroke="currentColor" stroke-width="5" fill="none" opacity=".6"/></svg>
+        <div><span class="subj">物理</span><h2>摩擦力：靜摩擦與動摩擦</h2></div></div>
+      <p class="desc">從推不動的箱子出發，認識靜摩擦力、最大靜摩擦力與動摩擦力，分析斜面受力、用 tanθ 測靜摩擦係數，並以 f–F 關係圖與疊箱範例統整概念。</p>
+      <div class="chips"><span class="chip">引言</span><span class="chip">靜摩擦力</span><span class="chip">斜面分析</span><span class="chip">範例</span><span class="chip">動摩擦力</span><span class="chip">總結</span></div>
+      <p class="kw">關鍵詞：靜摩擦力、最大靜摩擦力、動摩擦力、摩擦係數、正向力、斜面</p>
+      <div class="foot"><span>⏱ 5:00</span><span>🖼 14 張投影片</span><span class="play">▶ 播放</span></div>
+    </a>
+    <a class="card" href="chemistry-formula/index.html" style="--c:#2dd4bf;--i:4">
+      <div class="top"><svg class="icon" viewBox="0 0 80 80" aria-hidden="true"><path d="M32 12v20L14 62a6 6 0 0 0 5 8h42a6 6 0 0 0 5-8L48 32V12" fill="none" stroke="currentColor" stroke-width="5"/><path d="M28 12h24" stroke="currentColor" stroke-width="5"/><circle cx="34" cy="56" r="4" fill="currentColor"/><circle cx="46" cy="50" r="3" fill="currentColor"/></svg>
+        <div><span class="subj">化學</span><h2>化學式與百分組成</h2></div></div>
+      <p class="desc">從醋酸出發認識實驗式、分子式、結構式與示性式；學會由質量百分組成與燃燒分析求實驗式，再以分子量推得分子式，並以三聚氰胺素養題練習。</p>
+      <div class="chips"><span class="chip">引言</span><span class="chip">實驗式</span><span class="chip">分子式</span><span class="chip">結構式</span><span class="chip">示性式</span><span class="chip">總結</span></div>
+      <p class="kw">關鍵詞：實驗式、分子式、結構式、示性式、百分組成、燃燒分析</p>
+      <div class="foot"><span>⏱ 5:00</span><span>🖼 16 張投影片</span><span class="play">▶ 播放</span></div>
+    </a>
+    <a class="card" href="geography-climate/index.html" style="--c:#2dd4bf;--i:5">
+      <div class="top"><svg class="icon" viewBox="0 0 80 80" aria-hidden="true"><circle cx="40" cy="40" r="26" fill="none" stroke="currentColor" stroke-width="5"/><path d="M14 40h52M40 14c-12 14-12 38 0 52M40 14c12 14 12 38 0 52" fill="none" stroke="currentColor" stroke-width="4"/></svg>
+        <div><span class="subj">地理</span><h2>氣候系統：氣候要素</h2></div></div>
+      <p class="desc">認識氣候三大要素：緯度、高度、海陸與洋流如何影響氣溫，氣壓與風、氣旋反氣旋，以及降水量、強度、季節、變率與四種降水類型。</p>
+      <div class="chips"><span class="chip">引言</span><span class="chip">氣溫</span><span class="chip">氣壓與風</span><span class="chip">降水特性</span><span class="chip">降水類型</span><span class="chip">應用與總結</span></div>
+      <p class="kw">關鍵詞：氣溫、氣壓、風、氣旋、反氣旋、降水量變率</p>
+      <div class="foot"><span>⏱ 5:00</span><span>🖼 16 張投影片</span><span class="play">▶ 播放</span></div>
+    </a>
+    <a class="card" href="civics-ownership/index.html" style="--c:#34d399;--i:6">
+      <div class="top"><svg class="icon" viewBox="0 0 80 80" aria-hidden="true"><path d="M40 10l26 12H14z" fill="currentColor"/><path d="M20 28v28M33 28v28M47 28v28M60 28v28M12 62h56" stroke="currentColor" stroke-width="5"/></svg>
+        <div><span class="subj">公民</span><h2>所有權的物權特性</h2></div></div>
+      <p class="desc">從物權與債權的差異出發，認識所有權的使用、收益、處分與排除干涉權能，四大特性（直接支配、保護絕對、排他、優先），民法第767條保障與所有權限制。</p>
+      <div class="chips"><span class="chip">引言</span><span class="chip">所有權是什麼</span><span class="chip">四大特性</span><span class="chip">所有權的保障</span><span class="chip">限制與調和</span><span class="chip">總結</span></div>
+      <p class="kw">關鍵詞：所有權、物權、債權、直接支配性、保護絕對性、排他性</p>
+      <div class="foot"><span>⏱ 5:00</span><span>🖼 14 張投影片</span><span class="play">▶ 播放</span></div>
+    </a>
+</main>
+<section class="how">
+  <h3>使用方式</h3>
+  <div class="how-grid">
+    <div><b>▶ 點擊開始</b><p>瀏覽器規定需點一下才能播放語音，按下大播放鍵後即自動播放 5 分鐘。</p></div>
+    <div><b>🔊 旁白配音</b><p>使用瀏覽器內建語音合成（預設語音、中等語速）；可按 🔊 關閉旁白只看字幕。</p></div>
+    <div><b>⌨ 鍵盤操作</b><p>空白鍵 播放／暫停，← → 切換上一頁／下一頁，點進度條可跳轉。</p></div>
+    <div><b>📱 投影或手機</b><p>畫面固定為 1080×1920 並自動縮放；手機直向或投影全螢幕（F11）效果最佳。</p></div>
+  </div>
+</section>
+<footer>每支影片皆為單一 HTML 檔＋內嵌 SVG，無需安裝任何軟體</footer>
+</div>
+</body>
+</html>

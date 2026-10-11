@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>國文｜出師表</title>
+<style>
+:root{
+  --bg1:#0f172a; --bg2:#1e293b;
+  --accent:#38bdf8; --accent2:#f472b6; --accent3:#facc15;
+  --ink:#f8fafc; --muted:#94a3b8; --card:rgba(255,255,255,.07); --line:rgba(255,255,255,.14);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:100%;height:100%;background:#000;overflow:hidden;font-family:"Noto Sans TC","PingFang TC","Microsoft JhengHei","Heiti TC",system-ui,sans-serif;color:var(--ink)}
+#viewport{position:fixed;inset:0;display:flex;align-items:center;justify-content:center}
+#stage{position:relative;width:1080px;height:1920px;flex:none;transform-origin:center center;overflow:hidden;
+  background:radial-gradient(1200px 900px at 15% 0%,color-mix(in srgb,var(--accent) 22%,transparent),transparent 60%),
+             radial-gradient(1000px 900px at 100% 100%,color-mix(in srgb,var(--accent2) 20%,transparent),transparent 60%),
+             linear-gradient(160deg,var(--bg1),var(--bg2));}
+/* floating background particles */
+.bgdots{position:absolute;inset:0;pointer-events:none;opacity:.35}
+.bgdots span{position:absolute;border-radius:50%;background:var(--accent);filter:blur(1px);animation:drift linear infinite}
+@keyframes drift{from{transform:translateY(0)}to{transform:translateY(-2100px)}}
+
+/* header */
+#header{position:absolute;left:0;right:0;top:0;height:200px;padding:56px 64px 0;display:flex;align-items:center;gap:24px;z-index:5}
+#subjectTag{font-size:34px;font-weight:800;padding:10px 26px;border-radius:999px;background:var(--accent);color:#0b1020;letter-spacing:2px;white-space:nowrap}
+#lessonTitle{font-size:38px;font-weight:700;color:var(--ink);opacity:.92;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#sectionBar{position:absolute;top:200px;left:64px;right:64px;height:64px;display:flex;align-items:center;gap:18px;z-index:5}
+#sectionName{font-size:30px;color:var(--accent);font-weight:700;letter-spacing:2px}
+#pageNo{margin-left:auto;font-size:28px;color:var(--muted);font-variant-numeric:tabular-nums}
+
+/* slides */
+#slides{position:absolute;left:0;right:0;top:270px;height:1250px;perspective:2000px}
+.slide{position:absolute;inset:0;padding:10px 64px;visibility:hidden;opacity:0}
+.slide.show{visibility:visible;opacity:1}
+.slide h2{font-size:68px;line-height:1.25;font-weight:900;margin-bottom:28px;letter-spacing:1px}
+.slide h2 .hl{color:var(--accent)}
+.slide h3{font-size:46px;font-weight:800;margin:14px 0}
+.slide p,.slide li{font-size:40px;line-height:1.6}
+.slide .card{background:var(--card);border:2px solid var(--line);border-radius:32px;padding:32px 36px;margin:18px 0;backdrop-filter:blur(4px)}
+.slide .big{font-size:96px;font-weight:900;color:var(--accent3)}
+.slide .muted{color:var(--muted)}
+.slide .c1{color:var(--accent)} .slide .c2{color:var(--accent2)} .slide .c3{color:var(--accent3)}
+.slide .row{display:flex;gap:24px} .slide .row>*{flex:1}
+.slide .chip{display:inline-block;padding:8px 22px;border-radius:999px;background:color-mix(in srgb,var(--accent) 25%,transparent);border:2px solid var(--accent);font-size:32px;margin:6px 8px 6px 0}
+.slide .formula{font-family:"Cambria Math","Times New Roman",serif;font-size:56px;text-align:center;padding:24px;border-radius:24px;background:rgba(0,0,0,.25);border:2px dashed var(--accent)}
+.slide svg{display:block;max-width:100%;overflow:visible}
+.slide svg text{font-family:inherit}.slide svg text:not([fill]){fill:var(--ink)}
+
+/* transitions (enter) */
+.slide.enter-fade{animation:tFade .9s ease both}
+.slide.enter-slide{animation:tSlide .9s cubic-bezier(.2,.8,.2,1) both}
+.slide.enter-up{animation:tUp .9s cubic-bezier(.2,.8,.2,1) both}
+.slide.enter-zoom{animation:tZoom .9s cubic-bezier(.2,.8,.2,1) both}
+.slide.enter-flip{animation:tFlip 1s cubic-bezier(.2,.8,.2,1) both;transform-origin:center}
+.slide.enter-wipe{animation:tWipe 1s cubic-bezier(.6,0,.2,1) both}
+.slide.enter-circle{animation:tCircle 1.1s cubic-bezier(.6,0,.2,1) both}
+.slide.enter-blur{animation:tBlur 1s ease both}
+.slide.leave{visibility:visible;animation:tLeave .7s ease both}
+@keyframes tFade{from{opacity:0}to{opacity:1}}
+@keyframes tSlide{from{opacity:0;transform:translateX(320px)}to{opacity:1;transform:none}}
+@keyframes tUp{from{opacity:0;transform:translateY(220px)}to{opacity:1;transform:none}}
+@keyframes tZoom{from{opacity:0;transform:scale(.7)}to{opacity:1;transform:none}}
+@keyframes tFlip{from{opacity:0;transform:rotateY(-80deg)}to{opacity:1;transform:none}}
+@keyframes tWipe{from{clip-path:inset(0 100% 0 0)}to{clip-path:inset(0 0 0 0)}}
+@keyframes tCircle{from{clip-path:circle(0% at 50% 40%)}to{clip-path:circle(150% at 50% 40%)}}
+@keyframes tBlur{from{opacity:0;filter:blur(30px);transform:scale(1.08)}to{opacity:1;filter:none;transform:none}}
+@keyframes tLeave{from{opacity:1;transform:none}to{opacity:0;transform:scale(.94)}}
+
+/* element animations: add class="a-xxx" + style="--d:1.2s" (delay after slide enters) */
+.slide [class*="a-"]{opacity:0}
+.slide.run .a-fadeUp{animation:fadeUp .8s cubic-bezier(.2,.8,.2,1) var(--d,0s) both}
+.slide.run .a-fade{animation:tFade .8s ease var(--d,0s) both}
+.slide.run .a-pop{animation:pop .7s cubic-bezier(.3,1.6,.5,1) var(--d,0s) both}
+.slide.run .a-left{animation:fromLeft .8s cubic-bezier(.2,.8,.2,1) var(--d,0s) both}
+.slide.run .a-right{animation:fromRight .8s cubic-bezier(.2,.8,.2,1) var(--d,0s) both}
+.slide.run .a-grow{animation:growX 1.2s cubic-bezier(.2,.8,.2,1) var(--d,0s) both;transform-origin:left center}
+.slide.run .a-growY{animation:growY 1.2s cubic-bezier(.2,.8,.2,1) var(--d,0s) both;transform-box:fill-box;transform-origin:center bottom}
+.slide.run .a-draw{opacity:1;stroke-dasharray:var(--len,2000);stroke-dashoffset:var(--len,2000);animation:draw 2s ease var(--d,0s) forwards}
+.slide.run .a-spin{animation:tFade .5s var(--d,0s) both,spin 8s linear var(--d,0s) infinite;transform-box:fill-box;transform-origin:center}
+.slide.run .a-pulse{animation:tFade .5s var(--d,0s) both,pulse 1.8s ease-in-out var(--d,0s) infinite;transform-box:fill-box;transform-origin:center}
+.slide.run .a-float{animation:tFade .5s var(--d,0s) both,float 3s ease-in-out var(--d,0s) infinite}
+.slide.run .a-blink{animation:blink 1.2s ease-in-out var(--d,0s) infinite}
+.slide.run .a-type{animation:type 1.6s steps(24) var(--d,0s) both;overflow:hidden;white-space:nowrap;display:inline-block}
+@keyframes fadeUp{from{opacity:0;transform:translateY(60px)}to{opacity:1;transform:none}}
+@keyframes pop{0%{opacity:0;transform:scale(.3)}100%{opacity:1;transform:none}}
+@keyframes fromLeft{from{opacity:0;transform:translateX(-200px)}to{opacity:1;transform:none}}
+@keyframes fromRight{from{opacity:0;transform:translateX(200px)}to{opacity:1;transform:none}}
+@keyframes growX{from{opacity:1;transform:scaleX(0)}to{opacity:1;transform:none}}
+@keyframes growY{from{opacity:1;transform:scaleY(0)}to{opacity:1;transform:none}}
+@keyframes draw{to{stroke-dashoffset:0}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.12)}}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-18px)}}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.25}}
+@keyframes type{from{opacity:1;max-width:0}to{opacity:1;max-width:100%}}
+
+/* subtitles */
+#subs{position:absolute;left:48px;right:48px;top:1540px;height:220px;display:flex;align-items:center;justify-content:center;z-index:6}
+#subText{font-size:46px;line-height:1.5;font-weight:700;text-align:center;padding:22px 36px;border-radius:28px;
+  background:rgba(0,0,0,.55);border:2px solid var(--line);max-width:100%;text-shadow:0 2px 6px #000;transition:opacity .25s}
+#subText:empty{opacity:0}
+#subText.swap{animation:subIn .35s ease both}
+@keyframes subIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+
+/* controls */
+#controls{position:absolute;left:0;right:0;bottom:0;height:150px;padding:0 48px 30px;z-index:8;display:flex;flex-direction:column;justify-content:flex-end;gap:18px}
+#progress{position:relative;height:16px;border-radius:8px;background:rgba(255,255,255,.15);cursor:pointer}
+#progressFill{position:absolute;left:0;top:0;bottom:0;border-radius:8px;background:linear-gradient(90deg,var(--accent),var(--accent2));width:0}
+#progress .tick{position:absolute;top:-4px;width:4px;height:24px;background:rgba(255,255,255,.55);border-radius:2px}
+#btnRow{display:flex;align-items:center;gap:22px}
+#btnRow button{width:76px;height:76px;border-radius:50%;border:2px solid var(--line);background:rgba(255,255,255,.1);color:var(--ink);font-size:34px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+#btnRow button:hover{background:rgba(255,255,255,.22)}
+#btnRow #btnPlay{width:92px;height:92px;font-size:40px;background:var(--accent);color:#0b1020;border:none}
+#time{margin-left:auto;font-size:32px;color:var(--muted);font-variant-numeric:tabular-nums}
+#homeLink{font-size:28px;color:var(--muted);text-decoration:none;border:2px solid var(--line);padding:10px 20px;border-radius:999px}
+
+/* start overlay */
+#startOverlay{position:absolute;inset:0;z-index:20;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:44px;
+  background:rgba(5,10,25,.82);backdrop-filter:blur(8px);text-align:center;padding:80px}
+#startOverlay .sTag{font-size:40px;font-weight:800;padding:12px 36px;border-radius:999px;background:var(--accent);color:#0b1020}
+#startOverlay h1{font-size:84px;line-height:1.25;font-weight:900}
+#startOverlay p{font-size:36px;color:var(--muted);line-height:1.6}
+#startBtn{width:240px;height:240px;border-radius:50%;border:none;background:var(--accent);color:#0b1020;font-size:100px;cursor:pointer;
+  box-shadow:0 0 0 0 color-mix(in srgb,var(--accent) 70%,transparent);animation:ring 2s infinite}
+@keyframes ring{0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--accent) 60%,transparent)}100%{box-shadow:0 0 0 60px transparent}}
+#endOverlay{position:absolute;inset:0;z-index:19;display:none;flex-direction:column;align-items:center;justify-content:center;gap:40px;background:rgba(5,10,25,.8);text-align:center}
+#endOverlay h1{font-size:80px}
+#endOverlay button,#endOverlay a{font-size:40px;padding:22px 56px;border-radius:999px;border:none;background:var(--accent);color:#0b1020;font-weight:800;cursor:pointer;text-decoration:none}
+.slide .csb-serif{font-family:"Noto Serif TC","Songti TC","PMingLiU",serif}
+</style>
+</head>
+<body>
+<div id="viewport"><div id="stage">
+  <div class="bgdots" id="bgdots"></div>
+  <div id="header"><span id="subjectTag"></span><span id="lessonTitle"></span></div>
+  <div id="sectionBar"><span id="sectionName"></span><span id="pageNo"></span></div>
+  <div id="slides"></div>
+  <div id="subs"><div id="subText"></div></div>
+  <div id="controls">
+    <div id="progress"><div id="progressFill"></div></div>
+    <div id="btnRow">
+      <button id="btnPrev" title="上一頁">⏮</button>
+      <button id="btnPlay" title="播放/暫停">▶</button>
+      <button id="btnNext" title="下一頁">⏭</button>
+      <button id="btnMute" title="旁白開關">🔊</button>
+      <a id="homeLink" href="../index.html">← 首頁</a>
+      <span id="time">00:00 / 05:00</span>
+    </div>
+  </div>
+  <div id="startOverlay">
+    <span class="sTag" id="sTag"></span>
+    <h1 id="sTitle"></h1>
+    <p id="sDesc"></p>
+    <button id="startBtn" aria-label="開始播放">▶</button>
+    <p>點擊開始播放（約 5 分鐘・含旁白配音與字幕）<br>空白鍵：播放/暫停　←/→：上/下一頁</p>
+  </div>
+  <div id="endOverlay"><h1>🎉 本課結束</h1><button id="replayBtn">↻ 重新播放</button><a href="../index.html">回到首頁</a></div>
+</div></div>
+
+<script>
+/* ===================== LESSON CONTENT (edit this part) ===================== */
+const LESSON = {subject:"國文", title:"出師表", desc:"諸葛亮北伐前的忠貞奏章：三大建議與報國深情", lang:"zh-TW", theme:{accent:"#e2533f", accent2:"#d4a843", accent3:"#f3d98b", bg1:"#120d0a", bg2:"#2b1f17"}};
+const SLIDES = [
+/* 1 標題 */
+{section:"引言", dur:21, trans:"zoom",
+ html:`<h2 class="a-fadeUp csb-serif">諸葛亮〈<span class="hl">出師表</span>〉</h2>
+ <svg viewBox="0 0 952 1000" width="952" height="1000">
+  <g class="a-fade" style="--d:.3s">
+   <rect x="96" y="40" width="760" height="720" rx="10" fill="#efe0bd" class="a-grow" style="--d:.4s"/>
+  </g>
+  <rect x="70" y="20" width="36" height="760" rx="14" fill="var(--accent2)" class="a-left" style="--d:.2s"/>
+  <rect x="846" y="20" width="36" height="760" rx="14" fill="var(--accent2)" class="a-right" style="--d:.2s"/>
+  <g class="a-fade" style="--d:1.4s" font-family="Noto Serif TC,Songti TC,serif">
+   <text x="600" y="190" font-size="150" font-weight="900" style="fill:#2a1a10" text-anchor="middle">出</text>
+   <text x="600" y="370" font-size="150" font-weight="900" style="fill:#2a1a10" text-anchor="middle">師</text>
+   <text x="600" y="550" font-size="150" font-weight="900" style="fill:#2a1a10" text-anchor="middle">表</text>
+   <text x="400" y="200" font-size="54" style="fill:#5a3a22" text-anchor="middle">蜀</text>
+   <text x="400" y="270" font-size="54" style="fill:#5a3a22" text-anchor="middle">漢</text>
+   <text x="400" y="380" font-size="54" style="fill:#5a3a22" text-anchor="middle">諸</text>
+   <text x="400" y="450" font-size="54" style="fill:#5a3a22" text-anchor="middle">葛</text>
+   <text x="400" y="520" font-size="54" style="fill:#5a3a22" text-anchor="middle">亮</text>
+  </g>
+  <g class="a-pop" style="--d:2.4s">
+   <rect x="210" y="560" width="120" height="120" rx="8" fill="var(--accent)"/>
+   <text x="270" y="612" font-size="44" font-weight="900" text-anchor="middle" style="fill:#fff3e0">忠武</text>
+   <text x="270" y="662" font-size="44" font-weight="900" text-anchor="middle" style="fill:#fff3e0">之印</text>
+  </g>
+  <g class="a-fadeUp" style="--d:3.2s">
+   <rect x="40" y="820" width="270" height="76" rx="38" fill="none" stroke="var(--accent)" stroke-width="3"/>
+   <text x="175" y="870" font-size="34" text-anchor="middle">建興五年</text>
+   <rect x="341" y="820" width="270" height="76" rx="38" fill="none" stroke="var(--accent2)" stroke-width="3"/>
+   <text x="476" y="870" font-size="34" text-anchor="middle">西元 227 年</text>
+   <rect x="642" y="820" width="270" height="76" rx="38" fill="none" stroke="var(--accent3)" stroke-width="3"/>
+   <text x="777" y="870" font-size="34" text-anchor="middle">臣上君奏章</text>
+  </g>
+ </svg>`,
+ lines:["同學好，今天我們要讀諸葛亮的〈出師表〉。","這是蜀漢丞相出兵北伐前，寫給後主劉禪的奏章。","全篇忠貞懇切，歷代傳誦不衰。","我們從背景、結構、三大建議到名句，一次讀懂。"]},
+
+/* 2 三國鼎立 */
+{section:"引言", dur:21, trans:"wipe",
+ html:`<h2 class="a-fadeUp">時代背景：<span class="hl">三國鼎立</span></h2>
+ <svg viewBox="0 0 952 1000" width="952" height="1000">
+  <path class="a-fade" style="--d:.5s" d="M60 80 L880 60 L900 420 L700 470 L560 440 L420 470 L300 430 L120 450 Z" fill="rgba(120,140,170,.35)" stroke="#9fb3cc" stroke-width="4"/>
+  <path class="a-fade" style="--d:1.2s" d="M560 440 L700 470 L900 420 L920 860 L520 880 L480 640 Z" fill="rgba(80,160,120,.35)" stroke="#8fd1ae" stroke-width="4"/>
+  <path class="a-fade" style="--d:1.9s" d="M120 450 L300 430 L420 470 L560 440 L480 640 L520 880 L80 860 L40 600 Z" fill="color-mix(in srgb,var(--accent) 45%,transparent)" stroke="var(--accent)" stroke-width="5"/>
+  <path class="a-draw" style="--len:1100;--d:2.4s" d="M80 700 C220 660 300 740 420 700 S600 660 700 720 S860 680 930 700" fill="none" stroke="#5aa9e6" stroke-width="10" stroke-linecap="round"/>
+  <text class="a-fade" style="--d:2.8s" x="600" y="760" font-size="30" fill="#9fd3ff">長江</text>
+  <g class="a-pop" style="--d:.8s"><text x="480" y="220" font-size="96" font-weight="900" text-anchor="middle">魏</text><circle cx="560" cy="300" r="12" fill="#fff"/><text x="580" y="310" font-size="32">洛陽</text></g>
+  <g class="a-pop" style="--d:1.5s"><text x="740" y="790" font-size="96" font-weight="900" text-anchor="middle">吳</text><circle cx="780" cy="560" r="12" fill="#fff"/><text x="800" y="570" font-size="32">建業</text></g>
+  <g class="a-pop" style="--d:2.1s"><text x="250" y="790" font-size="96" font-weight="900" text-anchor="middle" fill="var(--accent3)">蜀</text><circle cx="270" cy="560" r="14" fill="var(--accent3)" class="a-pulse" style="--d:2.2s"/><text x="160" y="610" font-size="32" fill="var(--accent3)">成都</text></g>
+  <g class="a-fadeUp" style="--d:4.5s">
+   <rect x="40" y="910" width="872" height="80" rx="20" fill="rgba(0,0,0,.35)" stroke="var(--accent)" stroke-width="3"/>
+   <text x="476" y="963" font-size="38" text-anchor="middle">「天下三分，<tspan fill="var(--accent)" font-weight="900">益州疲弊</tspan>」— 蜀漢最弱</text>
+  </g>
+ </svg>`,
+ lines:["先看時代背景。東漢末年天下大亂，群雄割據。","最後形成三國鼎立：魏在北方，吳在東南。","蜀漢偏居西南的益州，國力在三國中最弱。","文中說「天下三分，益州疲弊」，就是這個局面。"]},
+
+/* 3 生平時間軸 */
+{section:"作者與背景", dur:24, trans:"slide",
+ html:`<h2 class="a-fadeUp">作者：<span class="hl">諸葛亮</span>生平</h2>
+ <svg viewBox="0 0 952 1060" width="952" height="1060">
+  <line class="a-draw" style="--len:960;--d:.3s" x1="200" y1="40" x2="200" y2="1000" stroke="var(--accent2)" stroke-width="8"/>
+  <g class="a-left" style="--d:.8s"><text x="170" y="80" font-size="40" font-weight="900" text-anchor="end" fill="var(--accent2)">181</text><circle cx="200" cy="66" r="16" fill="var(--accent2)"/><text x="240" y="80" font-size="36">出生，字孔明，琅邪陽都人</text></g>
+  <g class="a-left" style="--d:3s"><text x="170" y="220" font-size="40" font-weight="900" text-anchor="end" fill="var(--accent2)">早年</text><circle cx="200" cy="206" r="16" fill="var(--accent2)"/><text x="240" y="220" font-size="36">隱居南陽隆中，躬耕讀書</text></g>
+  <g class="a-left" style="--d:5.5s"><text x="170" y="360" font-size="40" font-weight="900" text-anchor="end" fill="var(--accent)">207</text><circle cx="200" cy="346" r="20" fill="var(--accent)" class="a-pulse" style="--d:5.6s"/><text x="240" y="360" font-size="36" fill="var(--accent3)">劉備三顧茅廬・隆中對</text></g>
+  <g class="a-left" style="--d:9s"><text x="170" y="500" font-size="40" font-weight="900" text-anchor="end" fill="var(--accent2)">208</text><circle cx="200" cy="486" r="16" fill="var(--accent2)"/><text x="240" y="500" font-size="36">聯吳抗曹，赤壁之戰</text></g>
+  <g class="a-left" style="--d:12.5s"><text x="170" y="640" font-size="40" font-weight="900" text-anchor="end" fill="var(--accent2)">223</text><circle cx="200" cy="626" r="16" fill="var(--accent2)"/><text x="240" y="640" font-size="36">白帝城託孤，輔佐劉禪</text></g>
+  <g class="a-left" style="--d:15s"><text x="170" y="780" font-size="40" font-weight="900" text-anchor="end" fill="var(--accent)">227</text><circle cx="200" cy="766" r="20" fill="var(--accent)"/><text x="240" y="780" font-size="36" fill="var(--accent3)">上〈出師表〉，率軍北伐</text></g>
+  <g class="a-left" style="--d:18s"><text x="170" y="920" font-size="40" font-weight="900" text-anchor="end" fill="var(--accent2)">234</text><circle cx="200" cy="906" r="16" fill="var(--accent2)"/><text x="240" y="920" font-size="36">病逝五丈原，諡忠武侯</text></g>
+ </svg>`,
+ lines:["作者諸葛亮，字孔明，琅邪陽都人。","西元二〇七年，劉備三顧茅廬，他提出隆中對。","之後輔佐劉備聯吳抗曹，在赤壁大敗曹操。","劉備在白帝城託孤，由他輔佐後主劉禪。","二二七年上〈出師表〉北伐，後病逝五丈原。"]},
+
+/* 4 寫作背景 */
+{section:"作者與背景", dur:26, trans:"up",
+ html:`<h2 class="a-fadeUp">寫作背景與<span class="hl">「表」</span></h2>
+ <svg viewBox="0 0 952 1040" width="952" height="1040">
+  <g class="a-pop" style="--d:.6s"><circle cx="150" cy="170" r="110" fill="rgba(0,0,0,.3)" stroke="var(--accent2)" stroke-width="5"/><text x="150" y="160" font-size="40" font-weight="900" text-anchor="middle">丞相</text><text x="150" y="215" font-size="40" font-weight="900" text-anchor="middle" fill="var(--accent2)">諸葛亮</text></g>
+  <g class="a-pop" style="--d:1.2s"><circle cx="802" cy="170" r="110" fill="rgba(0,0,0,.3)" stroke="var(--accent)" stroke-width="5"/><text x="802" y="160" font-size="40" font-weight="900" text-anchor="middle">後主</text><text x="802" y="215" font-size="40" font-weight="900" text-anchor="middle" fill="var(--accent)">劉禪</text></g>
+  <path class="a-draw" style="--len:440;--d:2s" d="M270 170 L680 170" stroke="var(--accent3)" stroke-width="6" fill="none"/>
+  <path class="a-fade" style="--d:3.2s" d="M660 150 L690 170 L660 190 Z" fill="var(--accent3)"/>
+  <g class="a-pop" style="--d:2.6s"><rect x="405" y="80" width="140" height="70" rx="10" fill="#efe0bd"/><text x="475" y="128" font-size="40" font-weight="900" text-anchor="middle" style="fill:#2a1a10">表</text></g>
+  <text class="a-fade" style="--d:3s" x="475" y="225" font-size="30" text-anchor="middle" fill="var(--muted)">臣子上給君王的奏章</text>
+  <g class="a-fadeUp" style="--d:5s">
+   <rect x="20" y="320" width="270" height="140" rx="20" fill="rgba(0,0,0,.3)" stroke="var(--accent2)" stroke-width="3"/>
+   <text x="155" y="380" font-size="36" text-anchor="middle">225 年</text><text x="155" y="432" font-size="36" text-anchor="middle" fill="var(--accent2)">平定南方</text>
+  </g>
+  <path class="a-draw" style="--len:60;--d:6s" d="M300 390 L350 390" stroke="var(--ink)" stroke-width="5"/>
+  <g class="a-fadeUp" style="--d:7s">
+   <rect x="341" y="320" width="270" height="140" rx="20" fill="rgba(0,0,0,.3)" stroke="var(--accent)" stroke-width="3"/>
+   <text x="476" y="380" font-size="36" text-anchor="middle">227 年</text><text x="476" y="432" font-size="36" text-anchor="middle" fill="var(--accent)">上表出征</text>
+  </g>
+  <path class="a-draw" style="--len:60;--d:8s" d="M621 390 L671 390" stroke="var(--ink)" stroke-width="5"/>
+  <g class="a-fadeUp" style="--d:9s">
+   <rect x="662" y="320" width="270" height="140" rx="20" fill="rgba(0,0,0,.3)" stroke="var(--accent3)" stroke-width="3"/>
+   <text x="797" y="380" font-size="36" text-anchor="middle">目標</text><text x="797" y="432" font-size="36" text-anchor="middle" fill="var(--accent3)">北伐曹魏</text>
+  </g>
+  <g class="a-fadeUp" style="--d:11s">
+   <rect x="20" y="540" width="912" height="200" rx="26" fill="color-mix(in srgb,var(--accent) 18%,transparent)" stroke="var(--accent)" stroke-width="3"/>
+   <text x="60" y="610" font-size="38" font-weight="900" fill="var(--accent3)">憂心之處</text>
+   <text x="60" y="675" font-size="36">丞相出征在外，年輕後主留守成都，</text>
+   <text x="60" y="725" font-size="36">怕他親近小人、聽不進忠言。</text>
+  </g>
+  <g class="a-fadeUp" style="--d:16s">
+   <rect x="20" y="790" width="912" height="200" rx="26" fill="rgba(0,0,0,.3)" stroke="var(--accent2)" stroke-width="3"/>
+   <text x="60" y="860" font-size="38" font-weight="900" fill="var(--accent2)">文體特色</text>
+   <text x="60" y="925" font-size="36">陳情述志，情理兼具，語氣誠懇</text>
+  </g>
+ </svg>`,
+ lines:["〈出師表〉寫於蜀漢建興五年，西元二二七年。","當時諸葛亮已平定南方，準備率軍北伐曹魏。","他擔心年輕的後主親近小人，荒廢朝政。","於是寫下這篇「表」，也就是給君王的奏章。","表重在陳述心意，所以文字誠懇、情理兼具。"]},
+
+/* 5 文章結構 */
+{section:"文章結構", dur:25, trans:"flip",
+ html:`<h2 class="a-fadeUp">文章結構圖</h2>
+ <svg viewBox="0 0 952 1060" width="952" height="1060">
+  <g class="a-pop" style="--d:.4s"><rect x="326" y="10" width="300" height="100" rx="20" fill="var(--accent)"/><text x="476" y="77" font-size="48" font-weight="900" text-anchor="middle" style="fill:#fff6e8">出師表</text></g>
+  <path class="a-draw" style="--len:900;--d:1.2s" d="M476 110 L476 160 M160 160 L792 160 M160 160 L160 210 M476 160 L476 210 M792 160 L792 210" stroke="var(--accent2)" stroke-width="5" fill="none"/>
+  <g class="a-fadeUp" style="--d:3s">
+   <rect x="20" y="210" width="280" height="120" rx="20" fill="rgba(0,0,0,.35)" stroke="var(--accent3)" stroke-width="4"/>
+   <text x="160" y="262" font-size="44" font-weight="900" text-anchor="middle" fill="var(--accent3)">建言</text><text x="160" y="310" font-size="30" text-anchor="middle">第 1–5 段</text>
+   <rect x="20" y="360" width="280" height="96" rx="16" fill="var(--card)"/><text x="160" y="420" font-size="32" text-anchor="middle">開張聖聽</text>
+   <rect x="20" y="476" width="280" height="96" rx="16" fill="var(--card)"/><text x="160" y="536" font-size="32" text-anchor="middle">賞罰分明</text>
+   <rect x="20" y="592" width="280" height="96" rx="16" fill="var(--card)"/><text x="160" y="652" font-size="32" text-anchor="middle">親賢遠小人</text>
+   <rect x="20" y="708" width="280" height="96" rx="16" fill="var(--card)"/><text x="160" y="768" font-size="32" text-anchor="middle">推薦人才</text>
+  </g>
+  <g class="a-fadeUp" style="--d:7.5s">
+   <rect x="336" y="210" width="280" height="120" rx="20" fill="rgba(0,0,0,.35)" stroke="var(--accent2)" stroke-width="4"/>
+   <text x="476" y="262" font-size="44" font-weight="900" text-anchor="middle" fill="var(--accent2)">自述</text><text x="476" y="310" font-size="30" text-anchor="middle">第 6–7 段</text>
+   <rect x="336" y="360" width="280" height="96" rx="16" fill="var(--card)"/><text x="476" y="420" font-size="32" text-anchor="middle">布衣・三顧</text>
+   <rect x="336" y="476" width="280" height="96" rx="16" fill="var(--card)"/><text x="476" y="536" font-size="32" text-anchor="middle">受命・託孤</text>
+   <rect x="336" y="592" width="280" height="96" rx="16" fill="var(--card)"/><text x="476" y="652" font-size="32" text-anchor="middle">南征・北伐</text>
+  </g>
+  <g class="a-fadeUp" style="--d:12s">
+   <rect x="652" y="210" width="280" height="120" rx="20" fill="rgba(0,0,0,.35)" stroke="var(--accent)" stroke-width="4"/>
+   <text x="792" y="262" font-size="44" font-weight="900" text-anchor="middle" fill="var(--accent)">總結</text><text x="792" y="310" font-size="30" text-anchor="middle">第 8–9 段</text>
+   <rect x="652" y="360" width="280" height="96" rx="16" fill="var(--card)"/><text x="792" y="420" font-size="32" text-anchor="middle">分配責任</text>
+   <rect x="652" y="476" width="280" height="96" rx="16" fill="var(--card)"/><text x="792" y="536" font-size="32" text-anchor="middle">臨表涕零</text>
+  </g>
+  <g class="a-fadeUp" style="--d:16s">
+   <path d="M60 900 L892 900" stroke="var(--accent3)" stroke-width="4" class="a-grow" style="--d:16s"/>
+   <path d="M872 885 L900 900 L872 915 Z" fill="var(--accent3)"/>
+   <text x="160" y="970" font-size="36" text-anchor="middle">說理</text><text x="476" y="970" font-size="36" text-anchor="middle">動情</text><text x="792" y="970" font-size="36" text-anchor="middle">叮嚀</text>
+  </g>
+ </svg>`,
+ lines:["全文可分成三大部分，請看這張結構圖。","第一到五段是「建言」，提出治國的具體建議。","第六、七段是「自述」，回顧身世與受命經過。","第八、九段是「總結」，分配責任並表達不捨。","先說理，再動情，結構非常嚴謹。"]},
+
+/* 6 開張聖聽 */
+{section:"三大建議", dur:25, trans:"circle",
+ html:`<h2 class="a-fadeUp">建議一：<span class="hl">開張聖聽</span></h2>
+ <svg viewBox="0 0 952 1060" width="952" height="1060">
+  <g class="a-fadeUp" style="--d:.5s">
+   <rect x="20" y="10" width="912" height="250" rx="26" fill="rgba(0,0,0,.35)" stroke="var(--accent)" stroke-width="3"/>
+   <text x="56" y="76" font-size="38" font-weight="900" fill="var(--accent)">情勢危急</text>
+   <text x="56" y="140" font-size="36">先帝創業未半，而中道崩殂</text>
+   <text x="56" y="200" font-size="36">今天下三分，益州疲弊</text>
+  </g>
+  <g class="a-pop" style="--d:3.5s"><rect x="600" y="160" width="310" height="80" rx="40" fill="var(--accent)"/><text x="755" y="213" font-size="34" font-weight="900" text-anchor="middle" style="fill:#fff6e8">危急存亡之秋</text></g>
+  <g class="a-fadeUp" style="--d:6.5s">
+   <rect x="20" y="300" width="912" height="190" rx="26" fill="rgba(0,0,0,.25)" stroke="var(--accent2)" stroke-width="3"/>
+   <text x="56" y="366" font-size="38" font-weight="900" fill="var(--accent2)">但仍有希望</text>
+   <text x="56" y="432" font-size="34">侍衛之臣、忠志之士，追念先帝殊遇</text>
+  </g>
+  <path class="a-draw" style="--len:90;--d:10.5s" d="M476 500 L476 580" stroke="var(--accent3)" stroke-width="6"/>
+  <path class="a-fade" style="--d:11s" d="M456 570 L476 600 L496 570 Z" fill="var(--accent3)"/>
+  <g class="a-fade" style="--d:12s">
+   <path d="M220 700 C220 630 300 620 320 680 C335 730 280 740 290 790 C298 830 250 840 240 810" fill="none" stroke="var(--accent3)" stroke-width="12" stroke-linecap="round"/>
+   <path class="a-pulse" style="--d:12.5s" d="M360 660 Q390 720 360 780" fill="none" stroke="var(--accent3)" stroke-width="6"/>
+   <path class="a-pulse" style="--d:12.8s" d="M395 640 Q440 720 395 800" fill="none" stroke="var(--accent3)" stroke-width="6"/>
+   <path class="a-pulse" style="--d:13.1s" d="M430 620 Q490 720 430 820" fill="none" stroke="var(--accent3)" stroke-width="6"/>
+  </g>
+  <g class="a-right" style="--d:13s">
+   <text x="520" y="690" font-size="52" font-weight="900" fill="var(--accent3)">開張聖聽</text>
+   <text x="520" y="750" font-size="34">廣開言路，聽取忠言</text>
+  </g>
+  <g class="a-fadeUp" style="--d:19s">
+   <rect x="20" y="880" width="912" height="150" rx="26" fill="color-mix(in srgb,var(--accent) 18%,transparent)" stroke="var(--accent)" stroke-width="3"/>
+   <text x="476" y="944" font-size="34" text-anchor="middle">不宜<tspan fill="var(--accent3)">妄自菲薄</tspan>，<tspan fill="var(--accent3)">引喻失義</tspan></text>
+   <text x="476" y="998" font-size="32" text-anchor="middle" fill="var(--muted)">以塞忠諫之路也</text>
+  </g>
+ </svg>`,
+ lines:["第一段先分析情勢：先帝創業未半就去世，","如今天下三分，正是「危急存亡之秋」。","但忠臣志士感念先帝恩遇，仍想報答陛下。","所以第一個建議是「開張聖聽」，廣納忠言，","不要妄自菲薄，也別說不恰當的話堵住諫路。"]},
+
+/* 7 賞罰分明 */
+{section:"三大建議", dur:26, trans:"blur",
+ html:`<h2 class="a-fadeUp">建議二：<span class="hl">賞罰分明</span></h2>
+ <svg viewBox="0 0 952 1040" width="952" height="1040">
+  <rect class="a-growY" style="--d:.4s" x="466" y="140" width="20" height="560" fill="var(--accent2)"/>
+  <rect class="a-fade" style="--d:.8s" x="356" y="690" width="240" height="30" rx="10" fill="var(--accent2)"/>
+  <circle class="a-pop" style="--d:1s" cx="476" cy="130" r="26" fill="var(--accent3)"/>
+  <g class="a-fade" style="--d:1.4s">
+   <line x1="140" y1="200" x2="812" y2="200" stroke="var(--accent2)" stroke-width="12" stroke-linecap="round"/>
+   <path d="M140 200 L70 400 M140 200 L210 400 M812 200 L742 400 M812 200 L882 400" stroke="var(--muted)" stroke-width="3"/>
+   <path d="M50 400 Q140 470 230 400 Z" fill="color-mix(in srgb,var(--accent) 60%,transparent)" stroke="var(--accent)" stroke-width="4"/>
+   <path d="M722 400 Q812 470 902 400 Z" fill="color-mix(in srgb,var(--accent) 60%,transparent)" stroke="var(--accent)" stroke-width="4"/>
+  </g>
+  <text class="a-pop" style="--d:3s" x="140" y="530" font-size="52" font-weight="900" text-anchor="middle">宮中</text>
+  <text class="a-fade" style="--d:3.2s" x="140" y="580" font-size="30" text-anchor="middle" fill="var(--muted)">皇宮內廷</text>
+  <text class="a-pop" style="--d:3.6s" x="812" y="530" font-size="52" font-weight="900" text-anchor="middle">府中</text>
+  <text class="a-fade" style="--d:3.8s" x="812" y="580" font-size="30" text-anchor="middle" fill="var(--muted)">丞相府</text>
+  <text class="a-pop" style="--d:4.5s" x="476" y="80" font-size="44" font-weight="900" text-anchor="middle" fill="var(--accent3)">俱為一體</text>
+  <g class="a-fadeUp" style="--d:8s">
+   <rect x="20" y="760" width="440" height="120" rx="20" fill="rgba(0,0,0,.35)" stroke="var(--accent3)" stroke-width="3"/>
+   <text x="240" y="815" font-size="36" text-anchor="middle">陟罰臧否</text><text x="240" y="860" font-size="30" text-anchor="middle" fill="var(--muted)">升降・獎懲・善惡</text>
+   <rect x="492" y="760" width="440" height="120" rx="20" fill="rgba(0,0,0,.35)" stroke="var(--accent3)" stroke-width="3"/>
+   <text x="712" y="815" font-size="36" text-anchor="middle" fill="var(--accent3)">不宜異同</text><text x="712" y="860" font-size="30" text-anchor="middle" fill="var(--muted)">標準一致</text>
+  </g>
+  <g class="a-fadeUp" style="--d:14s">
+   <rect x="20" y="910" width="912" height="110" rx="20" fill="color-mix(in srgb,var(--accent) 18%,transparent)" stroke="var(--accent)" stroke-width="3"/>
+   <text x="476" y="978" font-size="34" text-anchor="middle">宜付有司，論其刑賞 ── 不可偏私</text>
+  </g>
+ </svg>`,
+ lines:["第二段提出第二個建議：賞罰要公平。","「宮中府中，俱為一體」，宮廷與丞相府是一體的。","「陟罰臧否，不宜異同」，獎懲標準要一致。","不論作惡或盡忠，都交給主管官員論定賞罰。","不能偏私，讓宮內和宮外的法令標準不同。"]},
+
+/* 8 親賢遠小人 */
+{section:"三大建議", dur:29, trans:"fade",
+ html:`<h2 class="a-fadeUp">建議三：<span class="hl">親賢臣，遠小人</span></h2>
+ <svg viewBox="0 0 952 1060" width="952" height="1060">
+  <g class="a-pop" style="--d:.5s"><circle cx="476" cy="330" r="100" fill="var(--accent)"/><text x="476" y="320" font-size="40" font-weight="900" text-anchor="middle" style="fill:#fff6e8">後主</text><text x="476" y="370" font-size="34" text-anchor="middle" style="fill:#fff6e8">劉禪</text></g>
+  <path class="a-draw" style="--len:300;--d:3s" d="M390 280 L250 170" stroke="var(--accent2)" stroke-width="4" fill="none"/>
+  <path class="a-draw" style="--len:300;--d:7s" d="M562 280 L700 170" stroke="var(--accent2)" stroke-width="4" fill="none"/>
+  <path class="a-draw" style="--len:200;--d:10s" d="M476 430 L476 520" stroke="var(--accent2)" stroke-width="4" fill="none"/>
+  <g class="a-left" style="--d:3.5s"><rect x="20" y="10" width="420" height="170" rx="20" fill="rgba(0,0,0,.35)" stroke="var(--accent3)" stroke-width="3"/><text x="230" y="66" font-size="32" text-anchor="middle" fill="var(--accent3)">宮中・侍中侍郎</text><text x="230" y="130" font-size="36" text-anchor="middle">郭攸之 費禕 董允</text></g>
+  <g class="a-right" style="--d:7s"><rect x="512" y="10" width="420" height="170" rx="20" fill="rgba(0,0,0,.35)" stroke="var(--accent3)" stroke-width="3"/><text x="722" y="66" font-size="32" text-anchor="middle" fill="var(--accent3)">軍中・將軍</text><text x="722" y="130" font-size="36" text-anchor="middle">向寵</text></g>
+  <g class="a-fadeUp" style="--d:10.5s"><rect x="140" y="520" width="672" height="130" rx="20" fill="rgba(0,0,0,.35)" stroke="var(--accent3)" stroke-width="3"/><text x="476" y="570" font-size="32" text-anchor="middle" fill="var(--accent3)">貞良死節之臣</text><text x="476" y="625" font-size="36" text-anchor="middle">陳震 張裔 蔣琬</text></g>
+  <g class="a-fadeUp" style="--d:15s">
+   <rect x="20" y="700" width="440" height="330" rx="24" fill="color-mix(in srgb,#4caf7a 20%,transparent)" stroke="#6fd39a" stroke-width="3"/>
+   <text x="240" y="760" font-size="36" text-anchor="middle" fill="#8ee6b2">親賢臣 遠小人</text>
+   <path d="M240 960 L240 810 M190 860 L240 810 L290 860" stroke="#8ee6b2" stroke-width="10" fill="none" stroke-linecap="round" class="a-float" style="--d:16s"/>
+   <text x="240" y="1005" font-size="34" text-anchor="middle">先漢興隆</text>
+  </g>
+  <g class="a-fadeUp" style="--d:20s">
+   <rect x="492" y="700" width="440" height="330" rx="24" fill="color-mix(in srgb,var(--accent) 20%,transparent)" stroke="var(--accent)" stroke-width="3"/>
+   <text x="712" y="760" font-size="36" text-anchor="middle" fill="var(--accent)">親小人 遠賢臣</text>
+   <path d="M712 810 L712 960 M662 910 L712 960 L762 910" stroke="var(--accent)" stroke-width="10" fill="none" stroke-linecap="round"/>
+   <text x="712" y="1005" font-size="34" text-anchor="middle">後漢傾頹</text>
+  </g>
+ </svg>`,
+ lines:["第三個建議是：親賢臣，遠小人。","他推薦宮中可以諮詢的郭攸之、費禕、董允，","以及軍中將領向寵，性行淑均，曉暢軍事。","還有陳震、張裔、蔣琬，都是忠貞可靠的大臣。","「親賢臣，遠小人，此先漢所以興隆也」。","反過來親小人、遠賢臣，正是後漢衰敗的原因。"]},
+
+/* 9 三大建議總覽 */
+{section:"三大建議", dur:17, trans:"zoom",
+ html:`<h2 class="a-fadeUp">三大建議<span class="hl">一覽</span></h2>
+ <svg viewBox="0 0 952 1060" width="952" height="1060">
+  <g class="a-left" style="--d:2s">
+   <rect x="20" y="20" width="912" height="280" rx="30" fill="rgba(0,0,0,.35)" stroke="var(--accent3)" stroke-width="3"/>
+   <circle cx="160" cy="160" r="100" fill="color-mix(in srgb,var(--accent3) 25%,transparent)" stroke="var(--accent3)" stroke-width="4"/>
+   <path d="M130 130 C130 90 190 85 200 125 C208 160 170 165 175 195 C180 220 150 225 145 205" fill="none" stroke="var(--accent3)" stroke-width="9" stroke-linecap="round"/>
+   <text x="300" y="140" font-size="52" font-weight="900" fill="var(--accent3)">一、開張聖聽</text>
+   <text x="300" y="210" font-size="36">打開耳朵，廣納忠言</text>
+  </g>
+  <g class="a-left" style="--d:6s">
+   <rect x="20" y="340" width="912" height="280" rx="30" fill="rgba(0,0,0,.35)" stroke="var(--accent2)" stroke-width="3"/>
+   <circle cx="160" cy="480" r="100" fill="color-mix(in srgb,var(--accent2) 25%,transparent)" stroke="var(--accent2)" stroke-width="4"/>
+   <path d="M160 420 L160 540 M100 440 L220 440 M100 440 L80 490 L120 490 Z M220 440 L200 490 L240 490 Z M130 540 L190 540" fill="none" stroke="var(--accent2)" stroke-width="7" stroke-linejoin="round"/>
+   <text x="300" y="460" font-size="52" font-weight="900" fill="var(--accent2)">二、賞罰分明</text>
+   <text x="300" y="530" font-size="36">標準一致，不偏不私</text>
+  </g>
+  <g class="a-left" style="--d:10s">
+   <rect x="20" y="660" width="912" height="280" rx="30" fill="rgba(0,0,0,.35)" stroke="var(--accent)" stroke-width="3"/>
+   <circle cx="160" cy="800" r="100" fill="color-mix(in srgb,var(--accent) 25%,transparent)" stroke="var(--accent)" stroke-width="4"/>
+   <circle cx="125" cy="770" r="22" fill="var(--accent)"/><circle cx="195" cy="770" r="22" fill="var(--accent)"/>
+   <path d="M90 850 Q125 800 160 850 Q195 800 230 850" fill="none" stroke="var(--accent)" stroke-width="9"/>
+   <text x="300" y="780" font-size="52" font-weight="900" fill="var(--accent)">三、親賢遠小人</text>
+   <text x="300" y="850" font-size="36">任用賢才，遠離小人</text>
+  </g>
+  <text class="a-pop" style="--d:14s" x="476" y="1020" font-size="38" text-anchor="middle" fill="var(--accent3)">環環相扣 ── 治國之本</text>
+ </svg>`,
+ lines:["我們把三大建議整理一下。","一、開張聖聽：打開耳朵，廣納忠言。","二、賞罰分明：標準一致，不偏不私。","三、親賢遠小人：任用賢才，遠離小人。"]},
+
+/* 10 自述 三顧茅廬 */
+{section:"自述與期許", dur:24, trans:"wipe",
+ html:`<h2 class="a-fadeUp">自述：<span class="hl">三顧草廬</span></h2>
+ <svg viewBox="0 0 952 1060" width="952" height="1060">
+  <g class="a-fade" style="--d:.4s">
+   <path d="M140 300 L300 180 L460 300 Z" fill="#8a6a3c"/><rect x="170" y="300" width="260" height="170" fill="#5c432a"/><rect x="270" y="360" width="60" height="110" fill="#2a1a10"/>
+   <text x="300" y="540" font-size="34" text-anchor="middle">南陽草廬</text>
+  </g>
+  <g class="a-right" style="--d:1.2s"><text x="520" y="230" font-size="44" font-weight="900" fill="var(--accent2)">臣本布衣</text><text x="520" y="295" font-size="36">躬耕於南陽</text><text x="520" y="355" font-size="32" fill="var(--muted)">苟全性命於亂世</text><text x="520" y="405" font-size="32" fill="var(--muted)">不求聞達於諸侯</text></g>
+  <g class="a-pop" style="--d:6s"><circle cx="160" cy="640" r="50" fill="var(--accent)"/><text x="160" y="655" font-size="40" font-weight="900" text-anchor="middle" style="fill:#fff6e8">一</text></g>
+  <g class="a-pop" style="--d:7s"><circle cx="300" cy="640" r="50" fill="var(--accent)"/><text x="300" y="655" font-size="40" font-weight="900" text-anchor="middle" style="fill:#fff6e8">二</text></g>
+  <g class="a-pop" style="--d:8s"><circle cx="440" cy="640" r="50" fill="var(--accent)"/><text x="440" y="655" font-size="40" font-weight="900" text-anchor="middle" style="fill:#fff6e8">三</text></g>
+  <g class="a-right" style="--d:8.5s"><text x="520" y="630" font-size="38" fill="var(--accent3)">三顧臣於草廬之中</text><text x="520" y="685" font-size="32">感激，遂許先帝以驅馳</text></g>
+  <g class="a-fadeUp" style="--d:15s">
+   <text x="40" y="820" font-size="34">受任於敗軍之際，奉命於危難之間</text>
+   <rect x="40" y="860" width="872" height="60" rx="30" fill="rgba(255,255,255,.1)"/>
+   <rect class="a-grow" style="--d:16s" x="40" y="860" width="872" height="60" rx="30" fill="var(--accent2)"/>
+   <text x="476" y="902" font-size="34" font-weight="900" text-anchor="middle" style="fill:#2a1a10">爾來二十有一年矣</text>
+  </g>
+ </svg>`,
+ lines:["第六段，諸葛亮轉而自述身世。","「臣本布衣，躬耕於南陽」，原只想在亂世保命。","先帝不嫌他卑微，「三顧臣於草廬之中」，","他深受感動，答應為先帝奔走效力。","後來在兵敗危難之際受命，至今已二十一年。"]},
+
+/* 11 北伐決心 */
+{section:"自述與期許", dur:23, trans:"slide",
+ html:`<h2 class="a-fadeUp">託孤之重與<span class="hl">北伐決心</span></h2>
+ <svg viewBox="0 0 952 1060" width="952" height="1060">
+  <rect x="20" y="10" width="912" height="640" rx="30" fill="rgba(0,0,0,.25)" stroke="var(--line)" stroke-width="2"/>
+  <g class="a-pop" style="--d:.6s"><circle cx="300" cy="380" r="18" fill="var(--accent3)"/><text x="330" y="392" font-size="34" fill="var(--accent3)">成都</text></g>
+  <g class="a-pop" style="--d:6s"><circle cx="230" cy="590" r="14" fill="#5aa9e6"/><text x="260" y="604" font-size="32" fill="#9fd3ff">瀘水・南中</text></g>
+  <path class="a-draw" style="--len:260;--d:6.5s" d="M300 395 C260 450 230 520 230 580" stroke="#5aa9e6" stroke-width="7" fill="none" stroke-dasharray="14 10"/>
+  <text class="a-fade" style="--d:7.5s" x="70" y="500" font-size="32" fill="#9fd3ff">五月渡瀘</text>
+  <g class="a-pop" style="--d:10s"><circle cx="380" cy="230" r="14" fill="#fff"/><text x="400" y="242" font-size="32">漢中</text></g>
+  <g class="a-pop" style="--d:12s"><circle cx="770" cy="140" r="20" fill="var(--accent)" class="a-pulse" style="--d:12.5s"/><text x="660" y="100" font-size="34" fill="var(--accent)">中原・舊都</text></g>
+  <path class="a-draw" style="--len:620;--d:10.5s" d="M300 365 C330 300 350 260 380 230 S600 160 750 145" stroke="var(--accent)" stroke-width="10" fill="none" stroke-linecap="round"/>
+  <text class="a-fade" style="--d:12s" x="560" y="250" font-size="40" font-weight="900" fill="var(--accent)">北伐 →</text>
+  <g class="a-fadeUp" style="--d:15s">
+   <rect x="20" y="690" width="210" height="100" rx="20" fill="var(--card)" stroke="var(--accent3)" stroke-width="3"/><text x="125" y="755" font-size="36" text-anchor="middle">北定中原</text>
+   <rect x="254" y="690" width="210" height="100" rx="20" fill="var(--card)" stroke="var(--accent3)" stroke-width="3"/><text x="359" y="755" font-size="36" text-anchor="middle">攘除姦凶</text>
+   <rect x="488" y="690" width="210" height="100" rx="20" fill="var(--card)" stroke="var(--accent3)" stroke-width="3"/><text x="593" y="755" font-size="36" text-anchor="middle">興復漢室</text>
+   <rect x="722" y="690" width="210" height="100" rx="20" fill="var(--card)" stroke="var(--accent3)" stroke-width="3"/><text x="827" y="755" font-size="36" text-anchor="middle">還于舊都</text>
+  </g>
+  <g class="a-fadeUp" style="--d:3s">
+   <rect x="20" y="840" width="912" height="160" rx="26" fill="color-mix(in srgb,var(--accent) 18%,transparent)" stroke="var(--accent)" stroke-width="3"/>
+   <text x="476" y="905" font-size="36" text-anchor="middle">先帝知臣謹慎，故臨崩寄臣以大事</text>
+   <text x="476" y="965" font-size="32" text-anchor="middle" fill="var(--muted)">受命以來，夙夜憂歎</text>
+  </g>
+ </svg>`,
+ lines:["第七段說明北伐決心。先帝臨終託付大事，","他受命以來日夜憂嘆，深怕辜負託付。","所以五月渡瀘，深入不毛，先平定南方。","如今兵甲已足，應當獎率三軍，北定中原，","攘除姦凶，興復漢室，還于舊都。"]},
+
+/* 12 責任分工 */
+{section:"自述與期許", dur:21, trans:"up",
+ html:`<h2 class="a-fadeUp">第八段：<span class="hl">各司其職</span></h2>
+ <svg viewBox="0 0 952 1060" width="952" height="1060">
+  <path class="a-fade" style="--d:.4s" d="M60 200 L476 40 L892 200 Z" fill="var(--accent)"/>
+  <text class="a-fade" style="--d:.6s;fill:#fff6e8" x="476" y="170" font-size="48" font-weight="900" text-anchor="middle">興復漢室</text>
+  <rect class="a-fade" style="--d:.8s" x="60" y="200" width="832" height="24" fill="var(--accent2)"/>
+  <rect class="a-growY" style="--d:2s" x="110" y="240" width="180" height="440" rx="10" fill="rgba(255,255,255,.12)" stroke="var(--accent3)" stroke-width="3"/>
+  <rect class="a-growY" style="--d:5s" x="386" y="240" width="180" height="440" rx="10" fill="rgba(255,255,255,.12)" stroke="var(--accent3)" stroke-width="3"/>
+  <rect class="a-growY" style="--d:9s" x="662" y="240" width="180" height="440" rx="10" fill="rgba(255,255,255,.12)" stroke="var(--accent3)" stroke-width="3"/>
+  <g class="a-fade" style="--d:2.8s" font-size="40" font-weight="900" text-anchor="middle"><text x="200" y="340" fill="var(--accent3)">討</text><text x="200" y="400" fill="var(--accent3)">賊</text><text x="200" y="460" fill="var(--accent3)">興</text><text x="200" y="520" fill="var(--accent3)">復</text></g>
+  <g class="a-fade" style="--d:5.8s" font-size="40" font-weight="900" text-anchor="middle"><text x="476" y="340" fill="var(--accent3)">進</text><text x="476" y="400" fill="var(--accent3)">盡</text><text x="476" y="460" fill="var(--accent3)">忠</text><text x="476" y="520" fill="var(--accent3)">言</text></g>
+  <g class="a-fade" style="--d:9.8s" font-size="40" font-weight="900" text-anchor="middle"><text x="752" y="340" fill="var(--accent3)">諮</text><text x="752" y="400" fill="var(--accent3)">諏</text><text x="752" y="460" fill="var(--accent3)">善</text><text x="752" y="520" fill="var(--accent3)">道</text></g>
+  <rect class="a-fade" style="--d:1s" x="60" y="680" width="832" height="24" fill="var(--accent2)"/>
+  <g class="a-fadeUp" style="--d:3s"><text x="200" y="770" font-size="38" font-weight="900" text-anchor="middle">臣</text><text x="200" y="820" font-size="30" text-anchor="middle" fill="var(--muted)">諸葛亮</text></g>
+  <g class="a-fadeUp" style="--d:6s"><text x="476" y="770" font-size="38" font-weight="900" text-anchor="middle">攸之・禕・允</text><text x="476" y="820" font-size="30" text-anchor="middle" fill="var(--muted)">宮中大臣</text></g>
+  <g class="a-fadeUp" style="--d:10s"><text x="752" y="770" font-size="38" font-weight="900" text-anchor="middle">陛下</text><text x="752" y="820" font-size="30" text-anchor="middle" fill="var(--muted)">察納雅言</text></g>
+  <g class="a-fadeUp" style="--d:15s">
+   <rect x="120" y="880" width="712" height="120" rx="60" fill="rgba(0,0,0,.35)" stroke="var(--accent)" stroke-width="3"/>
+   <text x="476" y="958" font-size="42" font-weight="900" text-anchor="middle" fill="var(--accent)">臨表涕零，不知所言</text>
+  </g>
+ </svg>`,
+ lines:["第八段把責任分清楚。","諸葛亮自己負責討伐曹魏、興復漢室。","郭攸之、費禕、董允，負責進盡忠言。","後主則要自謀，諮諏善道，察納雅言。","最後「臨表涕零，不知所言」，真情流露。"]},
+
+/* 13 名句卷軸 */
+{section:"名句與總結", dur:22, trans:"circle",
+ html:`<h2 class="a-fadeUp">千古<span class="hl">名句</span>卷軸</h2>
+ <svg viewBox="0 0 952 1060" width="952" height="1060">
+  <g>
+   <rect class="a-grow" style="--d:1.5s" x="40" y="20" width="872" height="200" rx="8" fill="#efe0bd"/>
+   <rect class="a-fade" style="--d:1.3s" x="22" y="10" width="28" height="220" rx="12" fill="var(--accent2)"/>
+   <rect class="a-fade" style="--d:2.4s" x="902" y="10" width="28" height="220" rx="12" fill="var(--accent2)"/>
+   <g class="a-fade" style="--d:2.6s"><text x="476" y="100" font-size="40" font-weight="900" text-anchor="middle" style="fill:#2a1a10">今天下三分，益州疲弊，</text><text x="476" y="165" font-size="40" font-weight="900" text-anchor="middle" style="fill:#2a1a10">此誠危急存亡之秋也</text></g>
+  </g>
+  <g>
+   <rect class="a-grow" style="--d:7s" x="40" y="270" width="872" height="160" rx="8" fill="#efe0bd"/>
+   <rect class="a-fade" style="--d:6.8s" x="22" y="260" width="28" height="180" rx="12" fill="var(--accent)"/>
+   <rect class="a-fade" style="--d:7.9s" x="902" y="260" width="28" height="180" rx="12" fill="var(--accent)"/>
+   <text class="a-fade" style="--d:8.1s;fill:#2a1a10" x="476" y="365" font-size="40" font-weight="900" text-anchor="middle">親賢臣，遠小人，此先漢所以興隆也</text>
+  </g>
+  <g>
+   <rect class="a-grow" style="--d:11.5s" x="40" y="480" width="872" height="160" rx="8" fill="#efe0bd"/>
+   <rect class="a-fade" style="--d:11.3s" x="22" y="470" width="28" height="180" rx="12" fill="var(--accent2)"/>
+   <rect class="a-fade" style="--d:12.4s" x="902" y="470" width="28" height="180" rx="12" fill="var(--accent2)"/>
+   <text class="a-fade" style="--d:12.6s;fill:#2a1a10" x="476" y="575" font-size="40" font-weight="900" text-anchor="middle">受任於敗軍之際，奉命於危難之間</text>
+  </g>
+  <g>
+   <rect class="a-grow" style="--d:16s" x="40" y="690" width="872" height="160" rx="8" fill="#efe0bd"/>
+   <rect class="a-fade" style="--d:15.8s" x="22" y="680" width="28" height="180" rx="12" fill="var(--accent)"/>
+   <rect class="a-fade" style="--d:16.9s" x="902" y="680" width="28" height="180" rx="12" fill="var(--accent)"/>
+   <text class="a-fade" style="--d:17.1s;fill:#2a1a10" x="476" y="785" font-size="44" font-weight="900" text-anchor="middle">臨表涕零，不知所言</text>
+  </g>
+  <g class="a-pop" style="--d:17.5s"><rect x="760" y="900" width="140" height="140" rx="10" fill="var(--accent)" transform="rotate(-6 830 970)"/><text x="830" y="960" font-size="44" font-weight="900" text-anchor="middle" style="fill:#fff6e8" transform="rotate(-6 830 970)">忠貞</text><text x="830" y="1012" font-size="44" font-weight="900" text-anchor="middle" style="fill:#fff6e8" transform="rotate(-6 830 970)">懇切</text></g>
+ </svg>`,
+ lines:["來欣賞幾句千古名句。","「今天下三分，益州疲弊，此誠危急存亡之秋也。」","「親賢臣，遠小人，此先漢所以興隆也。」","「受任於敗軍之際，奉命於危難之間。」","「臨表涕零，不知所言。」"]},
+
+/* 14 總結 */
+{section:"名句與總結", dur:25, trans:"blur",
+ html:`<h2 class="a-fadeUp">重點<span class="hl">總結</span></h2>
+ <svg viewBox="0 0 952 1060" width="952" height="1060">
+  <g class="a-fadeUp" style="--d:.8s">
+   <rect x="20" y="10" width="270" height="110" rx="55" fill="color-mix(in srgb,var(--accent3) 25%,transparent)" stroke="var(--accent3)" stroke-width="3"/><text x="155" y="80" font-size="40" font-weight="900" text-anchor="middle">建言</text>
+   <rect x="341" y="10" width="270" height="110" rx="55" fill="color-mix(in srgb,var(--accent2) 25%,transparent)" stroke="var(--accent2)" stroke-width="3"/><text x="476" y="80" font-size="40" font-weight="900" text-anchor="middle">自述</text>
+   <rect x="662" y="10" width="270" height="110" rx="55" fill="color-mix(in srgb,var(--accent) 25%,transparent)" stroke="var(--accent)" stroke-width="3"/><text x="797" y="80" font-size="40" font-weight="900" text-anchor="middle">總結</text>
+   <path d="M295 65 L335 65 M616 65 L656 65" stroke="var(--ink)" stroke-width="5"/>
+  </g>
+  <g class="a-fadeUp" style="--d:5s">
+   <rect x="20" y="160" width="912" height="250" rx="26" fill="rgba(0,0,0,.35)" stroke="var(--accent3)" stroke-width="3"/>
+   <text x="56" y="212" font-size="38" font-weight="900" fill="var(--accent3)">三大建議</text>
+   <circle cx="170" cy="292" r="44" fill="none" stroke="var(--accent3)" stroke-width="4"/><text x="170" y="304" font-size="34" text-anchor="middle">聽</text><text x="170" y="388" font-size="34" text-anchor="middle">開張聖聽</text>
+   <circle cx="476" cy="292" r="44" fill="none" stroke="var(--accent2)" stroke-width="4"/><text x="476" y="304" font-size="34" text-anchor="middle">賞</text><text x="476" y="388" font-size="34" text-anchor="middle">賞罰分明</text>
+   <circle cx="782" cy="292" r="44" fill="none" stroke="var(--accent)" stroke-width="4"/><text x="782" y="304" font-size="34" text-anchor="middle">賢</text><text x="782" y="388" font-size="34" text-anchor="middle">親賢遠小人</text>
+  </g>
+  <g class="a-fadeUp" style="--d:10s">
+   <rect x="20" y="450" width="912" height="160" rx="26" fill="rgba(0,0,0,.35)" stroke="var(--accent2)" stroke-width="3"/>
+   <text x="56" y="512" font-size="38" font-weight="900" fill="var(--accent2)">人物品格</text>
+   <text x="56" y="574" font-size="36">忠貞・負責・知恩圖報・鞠躬盡瘁</text>
+  </g>
+  <g class="a-pop" style="--d:15s">
+   <rect x="20" y="650" width="912" height="290" rx="30" fill="color-mix(in srgb,var(--accent) 22%,transparent)" stroke="var(--accent)" stroke-width="4"/>
+   <text x="56" y="718" font-size="40" font-weight="900" fill="var(--accent3)">思考題</text>
+   <text x="56" y="790" font-size="36">在班級或社會中，</text>
+   <text x="56" y="850" font-size="36">怎樣才算真正的「賞罰分明」？</text>
+   <text x="56" y="910" font-size="30" fill="var(--muted)">連結 SDGs 16：和平正義與健全制度</text>
+  </g>
+  <text class="a-blink" style="--d:20s" x="476" y="1010" font-size="34" text-anchor="middle" fill="var(--accent2)">◆ 公平透明，是良好制度的基礎 ◆</text>
+ </svg>`,
+ lines:["總結：〈出師表〉先建言，再自述，最後總結。","三大建議是開張聖聽、賞罰分明、親賢遠小人。","全篇展現諸葛亮的忠貞與責任感。","思考題：在班級或社會中，怎樣才算賞罰分明？","公平透明的制度，正是和平正義社會的基礎。"]}
+]
+;
+/* ===================== PLAYER ENGINE ===================== */
+(function(){
+const TOTAL = 300;                       // seconds
+const $ = id => document.getElementById(id);
+const stage = $('stage'), slidesEl = $('slides'), subText = $('subText');
+// theme
+const root = document.documentElement.style;
+Object.entries(LESSON.theme||{}).forEach(([k,v])=>root.setProperty('--'+k,v));
+document.title = LESSON.subject + '｜' + LESSON.title;
+$('subjectTag').textContent = LESSON.subject; $('lessonTitle').textContent = LESSON.title;
+$('sTag').textContent = LESSON.subject; $('sTitle').textContent = LESSON.title; $('sDesc').textContent = LESSON.desc||'';
+
+// background particles
+const bg=$('bgdots'); for(let i=0;i<26;i++){const s=document.createElement('span');const z=6+Math.random()*16;
+  s.style.cssText=`width:${z}px;height:${z}px;left:${Math.random()*100}%;top:${100+Math.random()*100}%;animation-duration:${30+Math.random()*40}s;animation-delay:-${Math.random()*60}s;opacity:${.3+Math.random()*.7}`;bg.appendChild(s);}
+
+// scale to fit
+function fit(){const s=Math.min(innerWidth/1080,innerHeight/1920);stage.style.transform=`scale(${s})`;}
+addEventListener('resize',fit); fit();
+
+// normalise durations to exactly TOTAL seconds
+const rawSum = SLIDES.reduce((a,s)=>a+(s.dur||20),0);
+let acc=0;
+SLIDES.forEach((s,i)=>{
+  s.d = (s.dur||20)*TOTAL/rawSum; s.start=acc; acc+=s.d;
+  const el=document.createElement('div'); el.className='slide'; el.innerHTML=s.html; slidesEl.appendChild(el); s.el=el;
+  // subtitle cue timing: proportional to text length
+  const lead=0.7, tail=0.6, span=s.d-lead-tail;
+  const lens=s.lines.map(t=>Math.max(4,t.replace(/\s+/g,'').length*(/[一-鿿]/.test(t)?1:0.45)));
+  const sum=lens.reduce((a,b)=>a+b,0); let t=s.start+lead;
+  s.cues=s.lines.map((txt,j)=>{const c={txt,start:t,end:t+span*lens[j]/sum};t=c.end;return c;});
+  if(i>0){const tk=document.createElement('div');tk.className='tick';tk.style.left=(s.start/TOTAL*100)+'%';$('progress').appendChild(tk);}
+});
+const CUES = SLIDES.flatMap((s,i)=>s.cues.map(c=>({...c,slide:i})));
+
+// speech
+const synth = window.speechSynthesis; let muted=false, holdCue=-1, holdStart=0;
+function speak(txt){
+  if(!synth||muted) return;
+  if(synth.speaking||synth.pending) synth.cancel();
+  const u=new SpeechSynthesisUtterance(txt);
+  const isEn = !/[一-鿿]/.test(txt);
+  u.lang = isEn ? 'en-US' : (LESSON.lang||'zh-TW');  // default voice for that language
+  u.rate = 1.0; u.pitch = 1.0;                         // 中等語速
+  synth.speak(u);
+}
+function stopSpeech(){ if(synth) synth.cancel(); }
+
+// state
+let t=0, playing=false, last=null, curSlide=-1, curCue=-1, ended=false;
+function fmt(x){x=Math.max(0,Math.round(x));return String(Math.floor(x/60)).padStart(2,'0')+':'+String(x%60).padStart(2,'0');}
+
+function showSlide(i, animate=true){
+  if(i===curSlide) return;
+  const prev=SLIDES[curSlide];
+  if(prev){prev.el.className='slide leave'; const pe=prev.el; setTimeout(()=>{if(pe.classList.contains('leave'))pe.className='slide';},700);}
+  const s=SLIDES[i]; curSlide=i;
+  s.el.className='slide';
+  void s.el.offsetWidth;                                   // restart animations
+  s.el.className='slide show '+(animate?('enter-'+(s.trans||'fade')):'')+' run';
+  $('sectionName').textContent = '◆ '+(s.section||'');
+  $('pageNo').textContent = (i+1)+' / '+SLIDES.length;
+}
+function setCue(k, say){
+  if(k===curCue) return; curCue=k;
+  if(k<0){subText.textContent='';return;}
+  subText.classList.remove('swap'); void subText.offsetWidth;
+  subText.textContent=CUES[k].txt; subText.classList.add('swap');
+  if(say) speak(CUES[k].txt);
+}
+function cueAt(time){for(let k=CUES.length-1;k>=0;k--){if(time>=CUES[k].start) return time<CUES[k].end+0.6?k:-1;}return -1;}
+function slideAt(time){for(let i=SLIDES.length-1;i>=0;i--) if(time>=SLIDES[i].start) return i; return 0;}
+
+function render(say=true){
+  const i=slideAt(Math.min(t,TOTAL-0.01)); showSlide(i);
+  setCue(cueAt(t), say);
+  $('progressFill').style.width=(t/TOTAL*100)+'%';
+  $('time').textContent=fmt(t)+' / '+fmt(TOTAL);
+}
+function tick(now){
+  if(!playing){last=null;return;}
+  if(last!=null){
+    let dt=(now-last)/1000; if(dt>0.5) dt=0.05;
+    // keep narration in sync: if the next cue is due but the voice is still talking, hold the clock (max 3 s)
+    const nk=curCue+1;
+    if(!muted && synth && synth.speaking && nk<CUES.length && t+dt>=CUES[nk].start){
+      if(holdCue!==nk){holdCue=nk; holdStart=now;}
+      if(now-holdStart<3000) dt=0;           // after 3 s give up waiting and move on
+    }
+    t+=dt;
+  }
+  last=now;
+  if(t>=TOTAL){t=TOTAL;render(false);finish();return;}
+  render(true);
+  requestAnimationFrame(tick);
+}
+function play(){ if(ended){restart();return;} playing=true; $('btnPlay').textContent='⏸';
+  // re-speak the current cue when resuming
+  if(curCue>=0 && !(synth&&synth.speaking)) speak(CUES[curCue].txt);
+  requestAnimationFrame(tick); }
+function pause(){ playing=false; $('btnPlay').textContent='▶'; stopSpeech(); }
+function seek(time){ stopSpeech(); t=Math.max(0,Math.min(TOTAL-0.05,time)); ended=false; $('endOverlay').style.display='none';
+  curCue=-2; holdCue=-1; render(playing); }
+function finish(){ playing=false; ended=true; $('btnPlay').textContent='▶'; stopSpeech(); subText.textContent=''; $('endOverlay').style.display='flex'; }
+function restart(){ ended=false; $('endOverlay').style.display='none'; curSlide=-1; curCue=-1; t=0; play(); }
+
+$('startBtn').onclick=()=>{ $('startOverlay').style.display='none'; if(synth){synth.cancel(); synth.speak(new SpeechSynthesisUtterance(''));} t=0; render(false); curCue=-1; play(); };
+$('btnPlay').onclick=()=>playing?pause():play();
+$('btnPrev').onclick=()=>{const i=slideAt(t); const target=(t-SLIDES[i].start>2||i===0)?i:i-1; seek(SLIDES[target].start+0.01);};
+$('btnNext').onclick=()=>{const i=slideAt(t); if(i<SLIDES.length-1) seek(SLIDES[i+1].start+0.01);};
+$('btnMute').onclick=()=>{muted=!muted; $('btnMute').textContent=muted?'🔇':'🔊'; if(muted) stopSpeech(); else if(playing&&curCue>=0) speak(CUES[curCue].txt);};
+$('replayBtn').onclick=restart;
+$('progress').onclick=e=>{const r=e.currentTarget.getBoundingClientRect(); seek((e.clientX-r.left)/r.width*TOTAL);};
+addEventListener('keydown',e=>{ if($('startOverlay').style.display!=='none'){ if(e.code==='Space'||e.code==='Enter'){e.preventDefault();$('startBtn').click();} return; }
+  if(e.code==='Space'){e.preventDefault(); playing?pause():play();}
+  if(e.code==='ArrowRight') $('btnNext').click();
+  if(e.code==='ArrowLeft') $('btnPrev').click();
+  if(e.key==='m') $('btnMute').click(); });
+// Chrome stops long speech queues while tab hidden — pause instead
+document.addEventListener('visibilitychange',()=>{ if(document.hidden && playing) pause(); });
+showSlide(0,false);
+})();
+</script>
+</body>
+</html>
